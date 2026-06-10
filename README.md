@@ -3,7 +3,7 @@
 Systematic comparison of how different atomic descriptors induce sampling biases
 when curating training sets via Farthest Point Sampling (FPS). Four descriptor
 types are compared on identical silicon datasets, and their effect on downstream
-MLIP performance is quantified in low-data regimes.
+MLIP performance is quantified in low-data regimes. Work out of Develop branch.
 
 **Descriptors:** SOAP · Behler-Parrinello · Bispectrum · ChIMES
 
