@@ -1,0 +1,30 @@
+# ── Dataset & raw descriptor inputs ──────────────────────────────────────────
+data.json
+descriptors/chimes/natoms.txt
+descriptors/chimes/A.txt
+
+# ── Generated outputs (descriptor + FPS pruning runs) ─────────────────────────
+descriptors/*/replicates_structure_pruning_modified/
+descriptors/*/replicates_structure_pruning/
+descriptors/*/structure_level_pruned/
+descriptors/behler/random_replicates_structure_pruning/
+random_replicates_structure_pruning/
+
+# ── Intermediate descriptor files ─────────────────────────────────────────────
+descriptors/chimes/frames_descriptors.pkl
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+
+# ── macOS ─────────────────────────────────────────────────────────────────────
+.DS_Store
+
+# ── Editor / tooling ──────────────────────────────────────────────────────────
+.claude/
+*.egg-info/
+dist/
+build/
+.env

@@ -1,0 +1,33 @@
+# Core numerics
+numpy
+scipy
+
+# Materials / structure handling
+pymatgen          # for deserializing data.json (monty uses it automatically)
+ase               # ASE Atoms — needed by SOAP descriptor
+
+# Descriptor libraries
+dscribe           # SOAP (descriptors/soap/)
+maml              # Behler-Parrinello + Bispectrum (descriptors/behler/, descriptors/bispectrum/)
+
+# Sampling / ML utilities
+scikit-learn
+skmatter          # FPS implementation
+
+# Serialisation
+monty
+
+# Analysis / plotting
+matplotlib
+
+# ── LAMMPS ────────────────────────────────────────────────────────────────────
+# maml's Behler-Parrinello and Bispectrum describers call LAMMPS as a subprocess.
+# Install LAMMPS separately and make sure `lmp` is on your PATH, then update
+# the os.environ['PATH'] line in:
+#   descriptors/behler/compute_and_prune.py
+#   descriptors/bispectrum/compute_and_prune.py
+#
+# Recommended install (conda):
+#   conda install -c conda-forge lammps
+#
+# Or download a pre-built binary from https://lammps.org/download.html
