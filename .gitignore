@@ -1,5 +1,4 @@
-# ── Dataset & raw descriptor inputs ──────────────────────────────────────────
-data.json
+# ── Raw ChIMES descriptor inputs (large; generated externally) ─────────────────
 descriptors/chimes/natoms.txt
 descriptors/chimes/A.txt
 
@@ -14,6 +13,7 @@ random_replicates_structure_pruning/
 descriptors/chimes/frames_descriptors.pkl
 
 # ── Python ────────────────────────────────────────────────────────────────────
+.venv/
 __pycache__/
 *.pyc
 *.pyo
