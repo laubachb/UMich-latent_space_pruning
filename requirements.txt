@@ -4,7 +4,7 @@ scipy
 
 # Materials / structure handling
 pymatgen          # for deserializing data.json (monty uses it automatically)
-ase               # ASE Atoms — needed by SOAP descriptor
+ase               # ASE Atoms — needed by SOAP + Euler characteristic descriptors
 
 # Descriptor libraries
 dscribe           # SOAP (descriptors/soap/)
