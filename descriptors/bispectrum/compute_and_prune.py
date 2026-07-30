@@ -16,6 +16,30 @@ os.environ['PATH'] = '/opt/homebrew/Cellar/lammps/20250722-update1/bin:' + os.en
 ELEMENT_PROFILE = {"Si": {"r": 0.5, "w": 1}}
 
 
+def _patch_maml_numpy2():
+    """Make maml's LAMMPS dump reader work under numpy>=2.
+
+    maml.apps.pes._lammps._read_dump defaults to the dtype string 'float_', an
+    alias numpy removed in 2.0, so parsing dump.sna raises
+    "data type 'float_' not understood". All internal callers use the module
+    global, so replacing it here fixes every Bispectrum read. Idempotent.
+    """
+    import io
+    from maml.apps.pes import _lammps
+    if getattr(_lammps, "_np2_float_patched", False):
+        return
+
+    def _read_dump(file_name, dtype="float64"):
+        if dtype == "float_":  # numpy<2 alias -> numpy>=2 canonical name
+            dtype = "float64"
+        with open(file_name) as f:
+            lines = f.readlines()[9:]
+        return np.loadtxt(io.StringIO("".join(lines)), dtype=dtype)
+
+    _lammps._read_dump = _read_dump
+    _lammps._np2_float_patched = True
+
+
 def aggregate_atomic_descriptors(atomic_descriptors, method='mean_std'):
     if method == 'mean':
         return np.mean(atomic_descriptors, axis=0)
@@ -30,28 +54,35 @@ def aggregate_atomic_descriptors(atomic_descriptors, method='mean_std'):
 
 
 def compute_descriptors(data, aggregation_method='mean_std'):
-    print(f"Computing Bispectrum descriptors with {aggregation_method} aggregation...")
-
-    structures = [d["structure"] for d in data]
-
-    describer = BispectrumCoefficients(
-        rcutfac=4.9,
-        twojmax=8,
-        element_profile=ELEMENT_PROFILE,
-        quadratic=False,
-        pot_fit=True,
-        include_stress=False,
-    )
-
-    structure_descriptors = []
-    for i, structure in enumerate(structures):
-        print(f"Processing structure {i+1}/{len(structures)}", end='\r')
-        atomic_descriptors = describer.transform_one(structure).values
-        structure_descriptor = aggregate_atomic_descriptors(atomic_descriptors, method=aggregation_method)
-        structure_descriptors.append(structure_descriptor)
-
-    print()
-    structure_descriptors = np.array(structure_descriptors)
+    # Cache the RAW (pre-standardization) descriptor matrix in this folder so the
+    # expensive LAMMPS Bispectrum evaluation runs only once; delete the .npy to
+    # force a rebuild.
+    cache = f"structure_descriptors_{aggregation_method}.npy"
+    if os.path.exists(cache):
+        print(f"Loading cached Bispectrum descriptors from {cache}")
+        structure_descriptors = np.load(cache)
+    else:
+        print(f"Computing Bispectrum descriptors with {aggregation_method} aggregation...")
+        _patch_maml_numpy2()
+        structures = [d["structure"] for d in data]
+        describer = BispectrumCoefficients(
+            rcutfac=4.9,
+            twojmax=8,
+            element_profile=ELEMENT_PROFILE,
+            quadratic=False,
+            pot_fit=True,
+            include_stress=False,
+        )
+        structure_descriptors = []
+        for i, structure in enumerate(structures):
+            print(f"Processing structure {i+1}/{len(structures)}", end='\r')
+            atomic_descriptors = describer.transform_one(structure).values
+            structure_descriptor = aggregate_atomic_descriptors(atomic_descriptors, method=aggregation_method)
+            structure_descriptors.append(structure_descriptor)
+        print()
+        structure_descriptors = np.array(structure_descriptors)
+        np.save(cache, structure_descriptors)
+        print(f"Cached raw descriptors -> {cache}  shape={structure_descriptors.shape}")
 
     scaler = StandardScaler()
     structure_descriptors_scaled = scaler.fit_transform(structure_descriptors)
@@ -100,12 +131,14 @@ def main():
     random.seed(42)
     replicate_seeds = [random.randint(0, 2**32 - 1) for _ in range(n_replicates)]
 
+    # Descriptors are deterministic, so compute them once and reuse across all
+    # FPS replicates (only the FPS random_state changes per replicate).
+    structure_descriptors_scaled, _ = compute_descriptors(data, aggregation_method)
+
     for replicate_idx in range(n_replicates):
         print(f"\n{'='*60}")
         print(f"Processing replicate {replicate_idx+1}/{n_replicates}  seed={replicate_seeds[replicate_idx]}")
         print(f"{'='*60}")
-
-        structure_descriptors_scaled, _ = compute_descriptors(data, aggregation_method)
 
         print(f"Performing FPS with seed {replicate_seeds[replicate_idx]}...")
         fps = FPS(initialize='random', n_to_select=len(data), random_state=replicate_seeds[replicate_idx])

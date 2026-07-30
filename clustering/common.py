@@ -181,8 +181,34 @@ def build_soap(data):
     return np.array(feats)
 
 
+def _patch_maml_numpy2():
+    """Make maml's LAMMPS dump reader work under numpy>=2.
+
+    maml.apps.pes._lammps._read_dump defaults to the dtype string 'float_',
+    an alias numpy removed in 2.0, so np.loadtxt raises
+    "data type 'float_' not understood". All internal callers reference the
+    function via the module global, so replacing it here fixes every call
+    (notably Bispectrum's dump.sna / dump.snad / dump.snav reads). Idempotent.
+    """
+    import io
+    from maml.apps.pes import _lammps
+    if getattr(_lammps, "_np2_float_patched", False):
+        return
+
+    def _read_dump(file_name, dtype="float64"):
+        if dtype == "float_":  # numpy<2 alias -> numpy>=2 canonical name
+            dtype = "float64"
+        with open(file_name) as f:
+            lines = f.readlines()[9:]
+        return np.loadtxt(io.StringIO("".join(lines)), dtype=dtype)
+
+    _lammps._read_dump = _read_dump
+    _lammps._np2_float_patched = True
+
+
 def build_behler(data):
     import os
+    _patch_maml_numpy2()
     from maml.describers import BPSymmetryFunctions
     os.environ.setdefault("PATH", "")  # ensure lmp is discoverable on user's PATH
     describer = BPSymmetryFunctions(
@@ -202,6 +228,7 @@ def build_behler(data):
 
 
 def build_bispectrum(data):
+    _patch_maml_numpy2()
     from maml.describers import BispectrumCoefficients
     describer = BispectrumCoefficients(
         rcutfac=4.9,
@@ -243,6 +270,22 @@ DESCRIPTOR_BUILDERS = {
     "bispectrum": build_bispectrum,
     "chimes": build_chimes,
 }
+
+# Human-readable display names for figures (acronyms/casing that .capitalize()
+# would get wrong, e.g. SOAP, ChIMES).
+DESCRIPTOR_LABELS = {
+    "euler": "Euler",
+    "soap": "SOAP",
+    "behler": "Behler",
+    "bispectrum": "Bispectrum",
+    "chimes": "ChIMES",
+}
+
+
+def descriptor_label(name: str) -> str:
+    """Display name for a descriptor, falling back to a capitalized key."""
+    return DESCRIPTOR_LABELS.get(name, name.capitalize())
+
 
 # Consistent colors for descriptors across all figures.
 DESCRIPTOR_COLORS = {

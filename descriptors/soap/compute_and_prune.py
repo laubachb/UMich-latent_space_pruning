@@ -40,20 +40,26 @@ def aggregate_atomic_descriptors(atomic_descriptors, method='mean_std'):
 
 
 def compute_descriptors(data, aggregation_method='mean_std'):
-    print(f"Computing SOAP descriptors with {aggregation_method} aggregation...")
-
-    soap = SOAP(**SOAP_PARAMS)
-
-    structure_descriptors = []
-    for i, d in enumerate(data):
-        print(f"Processing structure {i+1}/{len(data)}", end='\r')
-        atoms = pymatgen_to_ase(d["structure"])
-        atomic_descriptors = soap.create(atoms)  # shape: (n_atoms, n_features)
-        structure_descriptor = aggregate_atomic_descriptors(atomic_descriptors, method=aggregation_method)
-        structure_descriptors.append(structure_descriptor)
-
-    print()
-    structure_descriptors = np.array(structure_descriptors)
+    # Cache the RAW (pre-standardization) descriptor matrix in this folder so the
+    # expensive SOAP evaluation runs only once; delete the .npy to force a rebuild.
+    cache = f"structure_descriptors_{aggregation_method}.npy"
+    if os.path.exists(cache):
+        print(f"Loading cached SOAP descriptors from {cache}")
+        structure_descriptors = np.load(cache)
+    else:
+        print(f"Computing SOAP descriptors with {aggregation_method} aggregation...")
+        soap = SOAP(**SOAP_PARAMS)
+        structure_descriptors = []
+        for i, d in enumerate(data):
+            print(f"Processing structure {i+1}/{len(data)}", end='\r')
+            atoms = pymatgen_to_ase(d["structure"])
+            atomic_descriptors = soap.create(atoms)  # shape: (n_atoms, n_features)
+            structure_descriptor = aggregate_atomic_descriptors(atomic_descriptors, method=aggregation_method)
+            structure_descriptors.append(structure_descriptor)
+        print()
+        structure_descriptors = np.array(structure_descriptors)
+        np.save(cache, structure_descriptors)
+        print(f"Cached raw descriptors -> {cache}  shape={structure_descriptors.shape}")
 
     scaler = StandardScaler()
     structure_descriptors_scaled = scaler.fit_transform(structure_descriptors)
@@ -102,12 +108,14 @@ def main():
     random.seed(42)
     replicate_seeds = [random.randint(0, 2**32 - 1) for _ in range(n_replicates)]
 
+    # Descriptors are deterministic, so compute (or load) them once and reuse
+    # across all FPS replicates (only the FPS random_state changes per replicate).
+    structure_descriptors_scaled, _ = compute_descriptors(data, aggregation_method)
+
     for replicate_idx in range(n_replicates):
         print(f"\n{'='*60}")
         print(f"Processing replicate {replicate_idx+1}/{n_replicates}  seed={replicate_seeds[replicate_idx]}")
         print(f"{'='*60}")
-
-        structure_descriptors_scaled, _ = compute_descriptors(data, aggregation_method)
 
         print(f"Performing FPS with seed {replicate_seeds[replicate_idx]}...")
         fps = FPS(initialize='random', n_to_select=len(data), random_state=replicate_seeds[replicate_idx])

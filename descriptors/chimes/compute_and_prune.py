@@ -50,38 +50,55 @@ def main():
     data = loadfn("../../data.json")
     print(f"Loaded {len(data)} structures")
 
-    print("Loading ChIMES frame descriptors...")
-    with open("frames_descriptors.pkl", "rb") as f:
-        frame_descriptors = pickle.load(f)
-    print(f"Loaded {len(frame_descriptors)} frame matrices")
+    # Cache the RAW (pre-standardization) mean+std descriptor matrix in this folder
+    # so the aggregation runs only once; delete the .npy to force a rebuild. (This
+    # assumes every data.json entry has a matching ChIMES frame, which holds for the
+    # tracked dataset; delete the cache to re-run the frame-index matching.)
+    cache = "structure_descriptors_mean_std.npy"
+    if os.path.exists(cache):
+        print(f"Loading cached ChIMES descriptors from {cache}")
+        mean_std_descriptors = np.load(cache)
+        if len(mean_std_descriptors) != len(data):
+            raise ValueError(
+                f"Cached ChIMES rows ({len(mean_std_descriptors)}) != n structures "
+                f"({len(data)}); delete {cache} to rebuild.")
+        matched_indices = list(range(len(data)))
+    else:
+        print("Loading ChIMES frame descriptors...")
+        with open("frames_descriptors.pkl", "rb") as f:
+            frame_descriptors = pickle.load(f)
+        print(f"Loaded {len(frame_descriptors)} frame matrices")
 
-    # Match data.json entries to descriptor matrices via frame_index field
-    mean_std_descriptors = []
-    matched_indices = []
-    frames_with_zero_std = []
+        # Match data.json entries to descriptor matrices via frame_index field
+        mean_std_descriptors = []
+        matched_indices = []
+        frames_with_zero_std = []
 
-    for i, d in enumerate(data):
-        frame_index = d.get("frame_index", i)
-        if frame_index not in frame_descriptors:
-            print(f"Warning: frame index {frame_index} not found; skipping entry {i}")
-            continue
+        for i, d in enumerate(data):
+            frame_index = d.get("frame_index", i)
+            if frame_index not in frame_descriptors:
+                print(f"Warning: frame index {frame_index} not found; skipping entry {i}")
+                continue
 
-        matrix = np.array(frame_descriptors[frame_index])
-        mean_desc = np.mean(matrix, axis=0)
-        std_desc = np.std(matrix, axis=0)
+            matrix = np.array(frame_descriptors[frame_index])
+            mean_desc = np.mean(matrix, axis=0)
+            std_desc = np.std(matrix, axis=0)
 
-        if np.any(std_desc == 0):
-            zero_count = int(np.sum(std_desc == 0))
-            frames_with_zero_std.append((frame_index, zero_count))
+            if np.any(std_desc == 0):
+                zero_count = int(np.sum(std_desc == 0))
+                frames_with_zero_std.append((frame_index, zero_count))
 
-        mean_std_descriptors.append(np.concatenate([mean_desc, std_desc]))
-        matched_indices.append(i)
+            mean_std_descriptors.append(np.concatenate([mean_desc, std_desc]))
+            matched_indices.append(i)
 
-    mean_std_descriptors = np.array(mean_std_descriptors)
-    print(f"Matched {len(mean_std_descriptors)} descriptors out of {len(data)}")
+        mean_std_descriptors = np.array(mean_std_descriptors)
+        print(f"Matched {len(mean_std_descriptors)} descriptors out of {len(data)}")
 
-    if frames_with_zero_std:
-        print(f"Warning: {len(frames_with_zero_std)} frames have zero-std descriptor components.")
+        if frames_with_zero_std:
+            print(f"Warning: {len(frames_with_zero_std)} frames have zero-std descriptor components.")
+
+        np.save(cache, mean_std_descriptors)
+        print(f"Cached raw descriptors -> {cache}  shape={mean_std_descriptors.shape}")
 
     # Standardize; guard against zero-std columns
     mean = np.mean(mean_std_descriptors, axis=0)

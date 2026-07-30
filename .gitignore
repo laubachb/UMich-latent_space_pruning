@@ -12,6 +12,20 @@ random_replicates_structure_pruning/
 # ── Intermediate descriptor files ─────────────────────────────────────────────
 descriptors/chimes/frames_descriptors.pkl
 
+# Cached raw (pre-standardization) structure-descriptor matrices written by each
+# descriptors/*/compute_and_prune.py so the expensive descriptor evaluation runs
+# only once. Regenerable; delete a .npy to force that descriptor to recompute.
+descriptors/*/structure_descriptors_*.npy
+
+# Scratch dirs left by maml/LAMMPS static calculators
+descriptors/*/tmp*/
+
+# ── Clustering descriptor cache (regenerable via clustering/compute_descriptor_matrices.py) ──
+# Large per-frame descriptor matrices are cached locally but not committed (they
+# require dscribe / maml+LAMMPS / ChIMES to regenerate). The small result CSVs in
+# clustering/cache/ (metadata, metrics, entropy, distance stats) ARE tracked.
+clustering/cache/*.npy
+
 # ── Python ────────────────────────────────────────────────────────────────────
 .venv/
 __pycache__/

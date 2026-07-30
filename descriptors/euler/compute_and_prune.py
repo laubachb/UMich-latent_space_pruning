@@ -84,17 +84,25 @@ def euler_characteristic_curve(atoms, radii=FILTRATION_RADII, normalize=NORMALIZ
 
 
 def compute_descriptors(data):
-    print(f"Computing Euler characteristic curves "
-          f"(R_MAX={R_MAX} A, N_BINS={N_BINS}, normalize={NORMALIZE_PER_ATOM})...")
-
-    structure_descriptors = []
-    for i, d in enumerate(data):
-        print(f"Processing structure {i+1}/{len(data)}", end='\r')
-        atoms = pymatgen_to_ase(d["structure"])
-        structure_descriptors.append(euler_characteristic_curve(atoms))
-
-    print()
-    structure_descriptors = np.array(structure_descriptors)
+    # Cache the RAW (pre-standardization) descriptor matrix in this folder so the
+    # Euler characteristic curves are computed only once; delete the .npy to force
+    # a rebuild.
+    cache = "structure_descriptors_euler_ecc.npy"
+    if os.path.exists(cache):
+        print(f"Loading cached Euler characteristic curves from {cache}")
+        structure_descriptors = np.load(cache)
+    else:
+        print(f"Computing Euler characteristic curves "
+              f"(R_MAX={R_MAX} A, N_BINS={N_BINS}, normalize={NORMALIZE_PER_ATOM})...")
+        structure_descriptors = []
+        for i, d in enumerate(data):
+            print(f"Processing structure {i+1}/{len(data)}", end='\r')
+            atoms = pymatgen_to_ase(d["structure"])
+            structure_descriptors.append(euler_characteristic_curve(atoms))
+        print()
+        structure_descriptors = np.array(structure_descriptors)
+        np.save(cache, structure_descriptors)
+        print(f"Cached raw descriptors -> {cache}  shape={structure_descriptors.shape}")
 
     scaler = StandardScaler()
     structure_descriptors_scaled = scaler.fit_transform(structure_descriptors)
