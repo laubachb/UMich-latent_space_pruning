@@ -1,6 +1,37 @@
+"""
+FPS-based structure pruning using the Euler Characteristic Curve (ECC) descriptor.
+
+Unlike SOAP / Behler / Bispectrum (which produce *per-atom* descriptors that are
+then aggregated to structure level via mean+std), the Euler characteristic is an
+intrinsically *structure-level* topological quantity. For each frame we build a
+periodic (minimum-image) Vietoris-Rips filtration over the atomic point cloud and
+record the Euler characteristic
+
+        chi(r) = V - E(r) + T(r)
+
+as a function of the filtration radius r, where
+    V    = number of atoms                     (0-simplices, constant per frame)
+    E(r) = number of atom pairs with d <= r    (1-simplices)
+    T(r) = number of triangles with all
+           three edges <= r                    (2-simplices, VR flag complex)
+
+Sampling chi(r) on a fixed radius grid yields one comparable feature vector (the
+"Euler characteristic curve") per frame, which is standardized and fed to FPS.
+
+The curve is normalized per atom by default so that cell size does not dominate
+the descriptor (mixed 12- to 96-atom cells appear in data.json).
+
+Prerequisites:
+    data.json must be present at the project root (../../data.json).
+
+Run from this directory:
+    python compute_and_prune.py
+
+Output: replicates_structure_pruning_modified/ (created in this directory)
+"""
+
 from __future__ import annotations
 from monty.serialization import loadfn, dumpfn
-from dscribe.descriptors import SOAP
 from ase import Atoms
 import numpy as np
 from sklearn.preprocessing import StandardScaler
@@ -9,14 +40,14 @@ from skmatter.sample_selection import FPS
 import os
 import random
 
-# SOAP parameters for Si — adjust r_cut, n_max, l_max as needed.
-SOAP_PARAMS = dict(
-    species=["Si"],
-    r_cut=5.0,
-    n_max=9,
-    l_max=9,
-    periodic=True,
-)
+# ── Euler Characteristic Curve parameters ──────────────────────────────────────
+# Filtration radii (Angstrom) at which chi(r) is sampled. R_MAX ~ a few Si shells
+# (nn ~2.35 A, 2nd nn ~3.84 A); comparable to the SOAP/Behler cutoffs.
+R_MAX = 6.0
+N_BINS = 64
+NORMALIZE_PER_ATOM = True  # intensive descriptor -> comparable across cell sizes
+
+FILTRATION_RADII = np.linspace(0.0, R_MAX, N_BINS)
 
 
 def pymatgen_to_ase(structure):
@@ -26,36 +57,48 @@ def pymatgen_to_ase(structure):
     return Atoms(symbols=symbols, positions=positions, cell=cell, pbc=True)
 
 
-def aggregate_atomic_descriptors(atomic_descriptors, method='mean_std'):
-    if method == 'mean':
-        return np.mean(atomic_descriptors, axis=0)
-    elif method == 'mean_std':
-        mean_desc = np.mean(atomic_descriptors, axis=0)
-        std_desc = np.std(atomic_descriptors, axis=0)
-        return np.concatenate([mean_desc, std_desc])
-    elif method == 'sum':
-        return np.sum(atomic_descriptors, axis=0)
-    else:
-        raise ValueError(f"Unknown aggregation method: {method}")
+def euler_characteristic_curve(atoms, radii=FILTRATION_RADII, normalize=NORMALIZE_PER_ATOM):
+    """Euler characteristic curve of the periodic Vietoris-Rips filtration.
+
+    Returns a vector [chi(r_1), ..., chi(r_m)] with one entry per filtration radius.
+    Distances use the minimum-image convention so the curve respects periodicity.
+    """
+    n_atoms = len(atoms)
+
+    # Minimum-image pairwise distances (handles general / non-orthogonal cells).
+    dist = atoms.get_all_distances(mic=True)
+    np.fill_diagonal(dist, np.inf)  # exclude self-pairs from every filtration
+
+    chi = np.empty(len(radii))
+    for k, r in enumerate(radii):
+        adj = (dist <= r).astype(np.float64)  # 0/1 adjacency at this radius
+        n_edges = adj.sum() / 2.0
+        # Triangles in the flag complex: trace(A^3) counts each 3-clique 6 times.
+        n_triangles = np.trace(adj @ adj @ adj) / 6.0
+        chi[k] = n_atoms - n_edges + n_triangles
+
+    if normalize:
+        chi = chi / n_atoms
+
+    return chi
 
 
-def compute_descriptors(data, aggregation_method='mean_std'):
+def compute_descriptors(data):
     # Cache the RAW (pre-standardization) descriptor matrix in this folder so the
-    # expensive SOAP evaluation runs only once; delete the .npy to force a rebuild.
-    cache = f"structure_descriptors_{aggregation_method}.npy"
+    # Euler characteristic curves are computed only once; delete the .npy to force
+    # a rebuild.
+    cache = "structure_descriptors_euler_ecc.npy"
     if os.path.exists(cache):
-        print(f"Loading cached SOAP descriptors from {cache}")
+        print(f"Loading cached Euler characteristic curves from {cache}")
         structure_descriptors = np.load(cache)
     else:
-        print(f"Computing SOAP descriptors with {aggregation_method} aggregation...")
-        soap = SOAP(**SOAP_PARAMS)
+        print(f"Computing Euler characteristic curves "
+              f"(R_MAX={R_MAX} A, N_BINS={N_BINS}, normalize={NORMALIZE_PER_ATOM})...")
         structure_descriptors = []
         for i, d in enumerate(data):
             print(f"Processing structure {i+1}/{len(data)}", end='\r')
             atoms = pymatgen_to_ase(d["structure"])
-            atomic_descriptors = soap.create(atoms)  # shape: (n_atoms, n_features)
-            structure_descriptor = aggregate_atomic_descriptors(atomic_descriptors, method=aggregation_method)
-            structure_descriptors.append(structure_descriptor)
+            structure_descriptors.append(euler_characteristic_curve(atoms))
         print()
         structure_descriptors = np.array(structure_descriptors)
         np.save(cache, structure_descriptors)
@@ -99,7 +142,7 @@ def main():
 
     pruning_ratios = [0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09,
                       0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-    aggregation_method = 'mean_std'
+    descriptor_tag = 'euler_ecc'
     n_replicates = 10
 
     output_dir = "replicates_structure_pruning_modified"
@@ -108,9 +151,9 @@ def main():
     random.seed(42)
     replicate_seeds = [random.randint(0, 2**32 - 1) for _ in range(n_replicates)]
 
-    # Descriptors are deterministic, so compute (or load) them once and reuse
-    # across all FPS replicates (only the FPS random_state changes per replicate).
-    structure_descriptors_scaled, _ = compute_descriptors(data, aggregation_method)
+    # The Euler characteristic curves are deterministic, so compute them once and
+    # reuse across replicates (only the FPS random initialization varies).
+    structure_descriptors_scaled, _ = compute_descriptors(data)
 
     for replicate_idx in range(n_replicates):
         print(f"\n{'='*60}")
@@ -130,11 +173,11 @@ def main():
                 data, structure_descriptors_scaled, fps_ranking, pruning_ratio=ratio
             )
             selection_info['random_seed'] = replicate_seeds[replicate_idx]
-            selection_info['aggregation'] = aggregation_method
+            selection_info['descriptor'] = descriptor_tag
 
             percentage = ratio * 100
-            data_fn = f"{output_dir}/si_structures_soap_{aggregation_method}_{percentage:.0f}percent_replicate{replicate_idx+1:02d}.json"
-            info_fn = f"{output_dir}/si_structures_soap_{aggregation_method}_{percentage:.0f}percent_replicate{replicate_idx+1:02d}_info.json"
+            data_fn = f"{output_dir}/si_structures_{descriptor_tag}_{percentage:.0f}percent_replicate{replicate_idx+1:02d}.json"
+            info_fn = f"{output_dir}/si_structures_{descriptor_tag}_{percentage:.0f}percent_replicate{replicate_idx+1:02d}_info.json"
 
             dumpfn(pruned_data, data_fn, indent=2)
             dumpfn(selection_info, info_fn, indent=2)

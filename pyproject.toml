@@ -1,0 +1,30 @@
+[project]
+name = "umich-latent-space-pruning"
+version = "0.1.0"
+description = "Descriptor-induced sampling bias in MLIPs: descriptor FPS pruning, latent-space information, and physics-encoding analysis for Si datasets."
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+
+# Pinned to the exact stack that produced the committed figures/results. `uv.lock`
+# freezes the full transitive closure; `uv sync` reproduces it bit-for-bit.
+dependencies = [
+    "numpy==2.4.6",
+    "scipy==1.18.0",
+    "scikit-learn==1.8.0",
+    "pandas==3.0.5",
+    "matplotlib==3.11.1",
+    "ase==3.29.0",
+    "dscribe==2.1.2",        # SOAP
+    "maml==2025.4.3",        # Behler-Parrinello + Bispectrum (also needs LAMMPS on PATH)
+    "pymatgen==2026.5.4",    # deserialize data.json
+    "monty==2026.7.16",
+    "skmatter==0.3.3",       # Farthest Point Sampling
+    # maml still does `import pkg_resources`, which setuptools removed in v81.
+    # Keep setuptools below 81 or the Bispectrum/Behler describers fail to import.
+    "setuptools<81",
+]
+
+# Analysis repo, not an installable library: install the dependencies but do not
+# try to build this project itself.
+[tool.uv]
+package = false
