@@ -25,6 +25,7 @@ descriptors/*/tmp*/
 # require dscribe / maml+LAMMPS / ChIMES to regenerate). The small result CSVs in
 # clustering/cache/ (metadata, metrics, entropy, distance stats) ARE tracked.
 clustering/cache/*.npy
+clustering/cache/*.csv
 
 # ── Python ────────────────────────────────────────────────────────────────────
 .venv/

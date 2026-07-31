@@ -117,26 +117,30 @@ def main():
 
     skill, probe = grid("skill"), grid("probe")
 
-    fig, ax = plt.subplots(figsize=(1.1 * len(prop_labels) + 3.5, 0.7 * len(spaces) + 2.2))
+    fig = plt.figure(figsize=(3, 4))
+    # Manually placed square heatmap with a horizontal colorbar in a fixed slot
+    # below, clear of the vertical x-labels (avoids tight_layout squishing the
+    # grid). Square cells: axes width in inches == height in inches, i.e.
+    # width_frac * 3 == height_frac * 4  ->  0.64*3 == 0.48*4 == 1.92 in.
+    ax = fig.add_axes([0.30, 0.45, 0.64, 0.48])
     im = ax.imshow(skill, cmap="viridis", aspect="auto", vmin=0, vmax=1)
     ax.set_xticks(range(len(prop_labels)))
-    ax.set_xticklabels(prop_labels, rotation=20, ha="right", fontsize=11)
+    ax.set_xticklabels(prop_labels, rotation=90, ha="center", fontsize=10)
     ax.set_yticks(range(len(order)))
-    ax.set_yticklabels(disp, fontsize=11)
+    ax.set_yticklabels(disp, fontsize=10)
     for i in range(skill.shape[0]):
         for j in range(skill.shape[1]):
             v = probe[i, j]
             txt = "n/a" if not np.isfinite(v) else f"{v:.2f}"
             ax.text(j, i, txt, ha="center", va="center", fontsize=10,
                     color="w" if np.isfinite(skill[i, j]) and skill[i, j] < 0.5 else "k")
-    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-    cbar.set_label("Physical Skill Above Chance", fontsize=10)
-    ax.set_title("Decodability of Physics From Each Latent Space\n"
-                 "cell = cross-validated R² (E/atom, T, stress) or balanced accuracy "
-                 "(group, category)", fontsize=11, fontweight="bold")
-    fig.tight_layout()
+    cax = fig.add_axes([0.30, 0.16, 0.64, 0.028])
+    cbar = fig.colorbar(im, cax=cax, orientation="horizontal")
+    cbar.set_label("Decodability", fontsize=10)
+    cbar.ax.tick_params(labelsize=10)
     out = common.FIGURES_DIR / "clustering_physics_encoding.png"
-    fig.savefig(out, dpi=250, bbox_inches="tight")
+    # Manual axes + fixed figsize => saved file is exactly 3.25x3.25 in.
+    fig.savefig(out, dpi=250)
     print(f"Saved: {out}")
 
     print("\n" + "=" * 74)

@@ -84,11 +84,11 @@ def main():
         all_data[method_name] = method_data
 
     method_names = list(DESCRIPTOR_DIRS.values())
-    fig, axes = plt.subplots(1, len(method_names), figsize=(6 * len(method_names), 5),
-                             squeeze=False)
+    fig, axes = plt.subplots(2, 2, figsize=(6, 4.5), squeeze=False)
 
-    for col_idx, method_name in enumerate(method_names):
-        ax = axes[0][col_idx]
+    legend_handles = None
+    for idx, method_name in enumerate(method_names):
+        ax = axes[idx // 2][idx % 2]
         x = list(percentages)
 
         totals = [sum(all_data[method_name][p].values()) for p in percentages]
@@ -100,25 +100,31 @@ def main():
                 normalized.append(100 * count / totals[i] if totals[i] > 0 else 0)
             data_by_category[cat] = normalized
 
-        ax.stackplot(x, *[data_by_category[cat] for cat in CATEGORIES],
-                     labels=CATEGORIES,
-                     colors=[COLORS[cat] for cat in CATEGORIES],
-                     alpha=0.8, edgecolor='white', linewidth=1.5)
+        polys = ax.stackplot(x, *[data_by_category[cat] for cat in CATEGORIES],
+                             labels=CATEGORIES,
+                             colors=[COLORS[cat] for cat in CATEGORIES],
+                             alpha=0.8, edgecolor='white', linewidth=1.5)
+        if legend_handles is None:
+            legend_handles = polys
 
         ax.set_title(method_name, fontsize=13, fontweight='bold')
-        ax.set_xlabel('Pruning Percentage (%)', fontsize=11, fontweight='bold')
-        ax.set_ylabel('Composition (%)', fontsize=11, fontweight='bold')
-        if col_idx == len(method_names) - 1:
-            ax.legend(fontsize=8, loc='center left', bbox_to_anchor=(1.02, 0.5))
         ax.grid(False)
         ax.set_xticks(x)
         ax.set_ylim([0, 100])
         ax.set_xscale('log')
 
-    plt.tight_layout(rect=[0, 0, 0.98, 1.0])
+    # Unified axis labels centered across the 2x2 grid (one shared x, one shared y).
+    fig.supxlabel('Pruning Percentage (%)', fontsize=12, fontweight='bold', x=0.46, y=0.03)
+    fig.supylabel('Composition (%)', fontsize=12, fontweight='bold', x=0.035, y=0.53)
+    # Single legend to the right of the whole grid (kept inside the 6 in width).
+    fig.legend(legend_handles, CATEGORIES, fontsize=8, loc='center left',
+               bbox_to_anchor=(0.70, 0.5))
+    # Manual margins -> saved file is exactly 6x5 in (no bbox_inches='tight').
+    fig.subplots_adjust(left=0.15, right=0.70, bottom=0.14, top=0.91,
+                        wspace=0.22, hspace=0.62)
 
     output_path = FIGURES_DIR / 'normalized_category_composition.png'
-    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    plt.savefig(output_path, dpi=300)
     print(f'Saved: {output_path}')
 
     # Print table at key percentages
