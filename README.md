@@ -13,22 +13,20 @@ MLIP performance is quantified in low-data regimes. Work out of Develop branch.
 
 ```
 .
-├── descriptors/
-│   ├── behler/          Behler-Parrinello symmetry functions (maml)
-│   ├── bispectrum/      Bispectrum coefficients (maml + LAMMPS)
-│   ├── chimes/          ChIMES fingerprints (pre-computed descriptor file)
-│   ├── euler/           Euler characteristic curves (topological, numpy + ase)
-│   └── soap/            SOAP descriptors (dscribe)
+├── descriptors/         SOAP / Behler / Bispectrum / ChIMES / Euler + FPS pruning
+├── pruning/             Random baseline + normalized category composition plots
+├── clustering/          Latent-space information & physics-encoding analyses
 ├── analysis/
-│   └── normalized_category_composition.py   Main composition analysis figure
-├── figures/
-│   └── normalized_category_composition.png  Current output figure
-├── random_baseline.py   Descriptor-free random sampling (baseline comparison)
+│   ├── categorization.py   Shared structure / phase label rules
+│   └── umap/               Unsupervised UMAP study (viz only; see analysis/umap/)
+├── figures/             Composition + clustering figures
+├── models/              Downstream MLIP notes
 └── archive/             Old/superseded scripts and figures (not in active use)
 ```
 
 > **Not committed (see `.gitignore`):** `data.json`, all `replicates_structure_pruning_modified/`
-> output directories, `frames_descriptors.pkl`, `natoms.txt`.
+> output directories, `frames_descriptors.pkl`, `natoms.txt`, regenerable descriptor
+> caches (`*.npy` / UMAP `structure_descriptors.npz`).
 
 ---
 
@@ -105,6 +103,21 @@ uv run python clustering/cluster_motifs.py                   # KMeans/Ward vs me
 Each writes its figure(s) to `figures/` and small result tables to
 `clustering/cache/` (the large `*.npy` descriptor matrices there are regenerable
 and gitignored).
+
+### 5. Unsupervised UMAP visualization
+
+Baseline unsupervised UMAPs (category / phase / energy overlays) live under
+`analysis/umap/unsupervised/`. UMAP is for visualization only; FPS still runs in
+scaled high-dimensional descriptor space. Details and prerequisites:
+[`analysis/umap/unsupervised/README.md`](analysis/umap/unsupervised/README.md).
+
+```bash
+# Prefer a precomputed structure-level cache (see analysis/umap/descriptor_cache/)
+uv run python analysis/umap/unsupervised/scripts/generate_unsupervised_umaps.py
+
+# Optional: rebuild phase-labeled dataset overlay
+uv run python analysis/umap/unsupervised/scripts/relabel_phase_categories.py
+```
 
 ---
 

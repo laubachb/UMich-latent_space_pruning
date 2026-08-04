@@ -27,6 +27,15 @@ descriptors/*/tmp*/
 clustering/cache/*.npy
 clustering/cache/*.csv
 
+# ── UMAP local env / cache ────────────────────────────────────────────────────
+analysis/umap/.venv/
+analysis/umap/.micromamba/
+analysis/umap/.conda-pkgs/
+analysis/umap/.cache/
+# Prefer committing structure_descriptors.npz for clone-and-run UMAP;
+# ignore other regenerable caches under unsupervised/data/.
+analysis/umap/unsupervised/data/*.npz
+
 # ── Python ────────────────────────────────────────────────────────────────────
 .venv/
 __pycache__/
