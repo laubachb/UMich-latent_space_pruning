@@ -24,9 +24,12 @@ MLIP performance is quantified in low-data regimes. Work out of Develop branch.
 └── archive/             Old/superseded scripts and figures (not in active use)
 ```
 
-> **Not committed (see `.gitignore`):** `data.json`, all `replicates_structure_pruning_modified/`
-> output directories, `frames_descriptors.pkl`, `natoms.txt`, regenerable descriptor
-> caches (`*.npy` / UMAP `structure_descriptors.npz`).
+> **Not committed (see `.gitignore`):** large FPS outputs under
+> `replicates_structure_pruning_modified/`, ChIMES raw inputs (`A.txt`,
+> `natoms.txt`, `frames_descriptors.pkl`), regenerable
+> `descriptors/*/structure_descriptors_*.npy`, and the UMAP cache
+> `analysis/umap/descriptor_cache/structure_descriptors.npz`
+> (how to build it: [`analysis/umap/descriptor_cache/README.md`](analysis/umap/descriptor_cache/README.md)).
 
 ---
 
@@ -108,15 +111,19 @@ and gitignored).
 
 Baseline unsupervised UMAPs (category / phase / energy overlays) live under
 `analysis/umap/unsupervised/`. UMAP is for visualization only; FPS still runs in
-scaled high-dimensional descriptor space. Details and prerequisites:
+scaled high-dimensional descriptor space.
+
+**Step-by-step** (phase JSON → descriptor `.npz` → figures):
 [`analysis/umap/unsupervised/README.md`](analysis/umap/unsupervised/README.md).
 
 ```bash
-# Prefer a precomputed structure-level cache (see analysis/umap/descriptor_cache/)
-uv run python analysis/umap/unsupervised/scripts/generate_unsupervised_umaps.py
-
-# Optional: rebuild phase-labeled dataset overlay
+# Phase labels → analysis/umap/unsupervised/data/data_phase_categories.json
 uv run python analysis/umap/unsupervised/scripts/relabel_phase_categories.py
+
+# Descriptor cache (.npz, gitignored) + UMAP PNGs
+# Needs: data.json; ChIMES pickle for chimes; LAMMPS for Behler/Bispectrum
+uv run python \
+  analysis/umap/unsupervised/scripts/generate_unsupervised_umaps.py --force-recompute
 ```
 
 ---

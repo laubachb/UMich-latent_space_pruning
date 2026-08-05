@@ -2,13 +2,14 @@
 #
 # Layout (see README.md):
 #   unsupervised/     baseline study
-#   descriptor_cache/ structure_descriptors.npz (tracked) + README
+#   descriptor_cache/ regenerable structure_descriptors.npz (+ README)
 #   .venv/            local Python env
 
 .venv/
 .micromamba/
 .conda-pkgs/
 .cache/
+descriptor_cache/*.npz
 __pycache__/
 *.pyc
 .DS_Store

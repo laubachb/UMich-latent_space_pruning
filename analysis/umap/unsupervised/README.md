@@ -9,98 +9,157 @@ UMAP is visualization only; FPS pruning runs in scaled high-$D$ space.
 
 ---
 
-## Prerequisites (clone-and-run)
+## Files you generate (step by step)
 
-This folder alone is **not** enough to regenerate the figures. Large / shared inputs live elsewhere in the repo (or are gitignored) and must be present before you run the scripts.
+All commands below are run from the **repo root**.
 
-### Required files (not shipped inside this directory)
-
-| Path (from repo root) | Approx. size | Role | Usually in git? |
-|----------------------|--------------|------|-----------------|
-| `data.json` | ~2.5 MB | 214 Si structures + DFT energies | yes (repo root) |
-| `analysis/categorization.py` | small | Legacy + phase label rules | yes (must be committed with analysis) |
-| `analysis/umap/unsupervised/scripts/umap_helpers.py` | — | Descriptor load/compute, UMAP, plotting helpers | yes |
-
-### Large / optional inputs for descriptors
-
-Provide **at least one** of these paths so Behler / SOAP / Bispectrum / ChIMES can be loaded:
-
-| Path | Approx. size | Role | Notes |
-|------|--------------|------|--------|
-| `analysis/umap/descriptor_cache/structure_descriptors.npz` | ~2 MB | Precomputed structure-level descriptors (keys: `behler`, `soap`, `bispectrum`, `chimes`) | yes; see `../descriptor_cache/README.md` |
-| `descriptors/chimes/frames_descriptors.pkl` | ~70 MB | Raw ChIMES force-design matrices | **gitignored**; needed only if cache lacks `chimes` |
-| (recompute via dscribe / maml) | — | SOAP / Behler / Bispectrum | Needs packages (+ LAMMPS for Behler/Bispectrum) if cache missing |
-
-If the cache exists with keys `behler`, `soap`, `bispectrum`, `chimes`, regenerate **without** LAMMPS or the ChIMES pickle.
-
-### Python packages
-
-Prefer the repo-root **uv** environment (pinned in `pyproject.toml` / `uv.lock`,
-includes `umap-learn`):
+### Step 0 — Environment
 
 ```bash
-# from repo root
 uv sync
+```
+
+(or a local `analysis/umap/.venv` with `numpy scipy matplotlib scikit-learn pymatgen ase monty dscribe maml umap-learn`)
+
+### Step 1 — Input structures (`data.json`)
+
+| Output | Path | In git? |
+|--------|------|---------|
+| Si dataset | `data.json` (repo root) | yes |
+
+Place/keep the 214-structure pymatgen JSON at the repo root. Nothing to run.
+
+### Step 2 — ChIMES pickle (only if you need the ChIMES UMAP panel)
+
+| Output | Path | In git? |
+|--------|------|---------|
+| Frame matrices | `descriptors/chimes/frames_descriptors.pkl` | no (~70 MB) |
+
+```bash
+# Prerequisites (gitignored): descriptors/chimes/A.txt, descriptors/chimes/natoms.txt
+cd descriptors/chimes
+uv run python process_raw_descriptors.py
+cd ../..
+```
+
+Skip this step only if you already have a full `structure_descriptors.npz` that
+includes the `chimes` key (see Step 4).
+
+### Step 3 — Phase labels JSON
+
+| Output | Path | In git? |
+|--------|------|---------|
+| Labeled dataset | `analysis/umap/unsupervised/data/data_phase_categories.json` | yes (also regenerable) |
+
+```bash
+uv run python analysis/umap/unsupervised/scripts/relabel_phase_categories.py
+```
+
+Reads `data.json`, applies `analysis/categorization.py` (`category` +
+`phase_category`), writes the JSON above.
+
+### Step 4 — Structure-level descriptor cache (`.npz`)
+
+| Output | Path | In git? |
+|--------|------|---------|
+| Descriptor cache | `analysis/umap/descriptor_cache/structure_descriptors.npz` | **no** (gitignored) |
+
+```bash
+# Also needs LAMMPS on PATH for Behler + Bispectrum
+uv run python \
+  analysis/umap/unsupervised/scripts/generate_unsupervised_umaps.py --force-recompute
+```
+
+Built by `scripts/umap_helpers.py` → `load_or_compute_descriptors`:
+
+1. Load structures from `data.json`
+2. Compute SOAP / Behler / Bispectrum / ChIMES features
+3. Aggregate each structure with **mean ‖ std**
+4. Save keys `behler`, `soap`, `bispectrum`, `chimes` via `numpy.savez`
+
+Details (shapes, SOAP params, ChIMES pooling):
+[`../descriptor_cache/README.md`](../descriptor_cache/README.md).
+
+Without `--force-recompute`, an existing `.npz` is loaded and missing keys only
+are filled in.
+
+### Step 5 — UMAP figures (PNGs)
+
+| Output | Path | In git? |
+|--------|------|---------|
+| Legacy categories | `figures/original_categories/umap_by_category.png` | yes |
+| Phase categories | `figures/phase_categories/umap_by_phase.png` | yes |
+| Energy / atom | `figures/energy_per_atom/umap_by_energy.png` | yes |
+
+Same command as Step 4 (the generator writes figures after descriptors):
+
+```bash
 uv run python analysis/umap/unsupervised/scripts/generate_unsupervised_umaps.py
 ```
 
-Alternatively, create a local venv under `analysis/umap/.venv` and install
-`numpy`, `scipy`, `matplotlib`, `scikit-learn`, `pymatgen`, `ase`, `monty`,
-`dscribe`, `maml`, and `umap-learn` (LAMMPS on `PATH` if recomputing Behler /
-Bispectrum without a descriptor cache).
+Uses `data_phase_categories.json` when present (Step 3). Reuses the `.npz`
+from Step 4 unless you pass `--force-recompute`.
+
+---
+
+## Prerequisites summary
+
+| Path / tool | Role | In git? |
+|-------------|------|---------|
+| `data.json` | Structures + DFT energies | yes |
+| `analysis/categorization.py` | Label rules | yes |
+| `analysis/umap/unsupervised/scripts/*.py` | Generators + helpers | yes |
+| `analysis/umap/descriptor_cache/structure_descriptors.npz` | Structure-level descriptors | **no** — generate (Step 4) |
+| `descriptors/chimes/frames_descriptors.pkl` | Raw ChIMES frames | **no** — generate (Step 2) |
+| LAMMPS on `PATH` | Behler / Bispectrum recompute | system |
+
+### Python packages
+
+Prefer repo-root **uv** (`pyproject.toml` / `uv.lock`, includes `umap-learn`):
+
+```bash
+uv sync
+```
 
 ### Other system prerequisites
 
 | Requirement | Needed when |
 |-------------|-------------|
-| **Python ≥ 3.9** | Always |
-| **LAMMPS** on `PATH` (`lmp_serial`, `lmp_mpi`, or `lmp`) | Recomputing Behler / Bispectrum without a full descriptor cache. e.g. `conda install -c conda-forge lammps` or Homebrew |
-| **matplotlib GUI / Agg** | Figure writing (headless OK with default Agg) |
+| **Python ≥ 3.12** (uv pin) | Always with `uv sync` |
+| **LAMMPS** (`lmp_serial` / `lmp`) | Step 4 without a complete `.npz` that already has Behler/Bispectrum |
+| **matplotlib Agg** | Writing PNGs (headless OK) |
 
-### What this directory *does* include
+### What this directory ships in git
 
 | Path | Content |
 |------|---------|
-| `scripts/relabel_phase_categories.py` | Build phase-labeled JSON |
-| `scripts/generate_unsupervised_umaps.py` | Run UMAP + write figures |
+| `scripts/relabel_phase_categories.py` | Step 3 |
+| `scripts/generate_unsupervised_umaps.py` | Steps 4–5 |
 | `scripts/umap_helpers.py` | Descriptor / UMAP / plot helpers |
-| `data/data_phase_categories.json` | Labeled copy of `data.json` (regenerable) |
-| `figures/...` | Pre-rendered PNGs (viewable without running) |
+| `data/data_phase_categories.json` | Step 3 output (can regenerate) |
+| `figures/...` | Step 5 output (can regenerate) |
 | `README.md` | This file |
 
 ---
 
-## Quick start
-
-From **repo root**, after prerequisites are in place:
+## Quick start (all steps)
 
 ```bash
-# 1) Environment (once)
-python3 -m venv analysis/umap/.venv
-source analysis/umap/.venv/bin/activate   # Windows: analysis\umap\.venv\Scripts\activate
-pip install -U pip
-pip install numpy scipy matplotlib scikit-learn pymatgen ase monty dscribe maml umap-learn
+# 0) Environment
+uv sync
 
-# 2) Labels (writes data/data_phase_categories.json)
-./analysis/umap/.venv/bin/python \
-  analysis/umap/unsupervised/scripts/relabel_phase_categories.py
+# 1) data.json already at repo root
 
-# 3) UMAP figures (uses descriptor_cache/structure_descriptors.npz if present)
-./analysis/umap/.venv/bin/python \
-  analysis/umap/unsupervised/scripts/generate_unsupervised_umaps.py
+# 2) ChIMES pickle (if building ChIMES from scratch)
+cd descriptors/chimes && uv run python process_raw_descriptors.py && cd ../..
 
-# Optional: force descriptor recompute
-./analysis/umap/.venv/bin/python \
+# 3) Phase labels
+uv run python analysis/umap/unsupervised/scripts/relabel_phase_categories.py
+
+# 4–5) Descriptor .npz + UMAP figures
+uv run python \
   analysis/umap/unsupervised/scripts/generate_unsupervised_umaps.py --force-recompute
 ```
-
-Outputs:
-
-| Path | Content |
-|------|---------|
-| `figures/original_categories/umap_by_category.png` | Legacy labels |
-| `figures/phase_categories/umap_by_phase.png` | Phase labels |
-| `figures/energy_per_atom/umap_by_energy.png` | Energy/atom overlay |
 
 ---
 

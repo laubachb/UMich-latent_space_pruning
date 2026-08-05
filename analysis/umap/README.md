@@ -13,30 +13,32 @@ analysis/umap/
 │   │   ├── relabel_phase_categories.py
 │   │   └── umap_helpers.py
 │   ├── data/
-│   │   └── data_phase_categories.json
-│   └── figures/
-│       ├── original_categories/  # legacy labels
-│       ├── phase_categories/     # phase labels
-│       └── energy_per_atom/      # DFT energy/atom overlays
-├── descriptor_cache/             # structure_descriptors.npz (+ README)
+│   │   └── data_phase_categories.json   # regenerable
+│   └── figures/                           # regenerable PNGs
+├── descriptor_cache/
+│   ├── README.md
+│   └── structure_descriptors.npz          # regenerable, gitignored
 └── .venv/
 ```
 
 Label rules: `analysis/categorization.py`
 
-## Commands
+Step-by-step generation of each file:
+[`unsupervised/README.md`](unsupervised/README.md) and
+[`descriptor_cache/README.md`](descriptor_cache/README.md).
 
-From repo root (preferred: `uv sync` once, then `uv run`):
+## Commands (summary)
+
+From repo root (`uv sync` once first):
 
 ```bash
-# Rebuild phase-labeled dataset
+# 1) Phase-labeled dataset → unsupervised/data/data_phase_categories.json
 uv run python analysis/umap/unsupervised/scripts/relabel_phase_categories.py
 
-# Baseline unsupervised UMAPs (category + energy overlays)
+# 2) Descriptor cache (.npz) + UMAP figures
+#    (needs data.json; for ChIMES also frames_descriptors.pkl; LAMMPS for Behler/Bispectrum)
+uv run python analysis/umap/unsupervised/scripts/generate_unsupervised_umaps.py --force-recompute
+
+# Later runs can reuse the cache (omit --force-recompute):
 uv run python analysis/umap/unsupervised/scripts/generate_unsupervised_umaps.py
 ```
-
-A local `analysis/umap/.venv` also works if you prefer not to use the repo-root uv env.
-
-Requires `data.json` at the repo root. LAMMPS (`lmp_serial`) on `PATH` is only
-needed when recomputing Behler/Bispectrum without a descriptor cache.
