@@ -5,9 +5,8 @@ Normalized category composition plots across pruning rates.
 Shows how each descriptor's FPS selects from different structure categories
 (strained, high-temp, surface, etc.) as a function of pruning percentage.
 
-Run from the project root OR from the analysis/ directory:
-    python analysis/normalized_category_composition.py
-    cd analysis && python normalized_category_composition.py
+Run from the project root:
+    uv run python pruning/normalized_category_composition.py
 
 Output: figures/normalized_category_composition.png
 """

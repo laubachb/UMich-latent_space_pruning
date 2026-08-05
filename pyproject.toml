@@ -19,6 +19,7 @@ dependencies = [
     "pymatgen==2026.5.4",    # deserialize data.json
     "monty==2026.7.16",
     "skmatter==0.3.3",       # Farthest Point Sampling
+    "umap-learn>=0.5.3",     # analysis/umap unsupervised visualizations
     # maml still does `import pkg_resources`, which setuptools removed in v81.
     # Keep setuptools below 81 or the Bispectrum/Behler describers fail to import.
     "setuptools<81",
