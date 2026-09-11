@@ -43,3 +43,7 @@ __pycache__/
 dist/
 build/
 .env
+
+writing/
+random_for_ben/
+figures/*.png

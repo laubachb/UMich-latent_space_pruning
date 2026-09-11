@@ -25,11 +25,20 @@ ROOT_DIR = SCRIPT_DIR.parent
 FIGURES_DIR = ROOT_DIR / "figures"
 FIGURES_DIR.mkdir(exist_ok=True)
 
-DESCRIPTOR_DIRS = {
-    str(ROOT_DIR / 'descriptors' / 'behler'): 'Behler',
-    str(ROOT_DIR / 'descriptors' / 'bispectrum'): 'Bispectrum',
-    str(ROOT_DIR / 'descriptors' / 'soap'): 'SOAP',
-    str(ROOT_DIR / 'descriptors' / 'chimes'): 'ChIMES',
+# Each method maps to a glob pattern with a {percent} placeholder. The random
+# baseline lives in its own directory with a different filename prefix, so it
+# needs its own pattern rather than sharing the descriptor layout.
+def _descriptor_pattern(name):
+    return str(ROOT_DIR / 'descriptors' / name / 'replicates_structure_pruning_modified'
+               / 'si_structures_*{percent}percent_replicate*.json')
+
+METHOD_PATTERNS = {
+    'Random': str(ROOT_DIR / 'random_for_ben'
+                  / 'Training_si_structures_random_{percent}percent_replicate*.json'),
+    'Behler': _descriptor_pattern('behler'),
+    'Bispectrum': _descriptor_pattern('bispectrum'),
+    'SOAP': _descriptor_pattern('soap'),
+    'ChIMES': _descriptor_pattern('chimes'),
 }
 
 CATEGORIES = ['Strained', 'High Temp (3374K)', 'Normal (300K)', 'Vacancy (300K)', 'Surface', 'Other']
@@ -58,8 +67,8 @@ def categorize_structure(description):
     return 'Other'
 
 
-def analyze_method_at_percentage(method_dir, percent):
-    pattern = f'{method_dir}/replicates_structure_pruning_modified/si_structures_*{percent}percent_replicate*.json'
+def analyze_method_at_percentage(pattern_template, percent):
+    pattern = pattern_template.format(percent=percent)
     files = [f for f in glob.glob(pattern) if not f.endswith('_info.json')]
 
     category_total = defaultdict(int)
@@ -77,18 +86,22 @@ def main():
     percentages = list(range(1, 10)) + list(range(10, 100, 10))
 
     all_data = {}
-    for method_dir, method_name in DESCRIPTOR_DIRS.items():
+    for method_name, pattern_template in METHOD_PATTERNS.items():
         method_data = {}
         for percent in percentages:
-            method_data[percent] = analyze_method_at_percentage(method_dir, percent)
+            method_data[percent] = analyze_method_at_percentage(pattern_template, percent)
         all_data[method_name] = method_data
 
-    method_names = list(DESCRIPTOR_DIRS.values())
-    fig, axes = plt.subplots(2, 2, figsize=(6, 4.5), squeeze=False)
+    method_names = list(METHOD_PATTERNS.keys())
+    # 2x3 grid holds the random baseline plus the four descriptors; the unused
+    # sixth cell hosts the shared legend. Constrained layout reserves room for
+    # the shared x/y labels and subplot titles so nothing overlaps.
+    n_cols = 3
+    fig, axes = plt.subplots(2, n_cols, figsize=(9, 4.5), squeeze=False, layout='constrained')
 
     legend_handles = None
     for idx, method_name in enumerate(method_names):
-        ax = axes[idx // 2][idx % 2]
+        ax = axes[idx // n_cols][idx % n_cols]
         x = list(percentages)
 
         totals = [sum(all_data[method_name][p].values()) for p in percentages]
@@ -107,21 +120,22 @@ def main():
         if legend_handles is None:
             legend_handles = polys
 
-        ax.set_title(method_name, fontsize=13, fontweight='bold')
+        ax.set_title(method_name, fontsize=12, fontweight='bold')
         ax.grid(False)
         ax.set_xticks(x)
         ax.set_ylim([0, 100])
         ax.set_xscale('log')
 
-    # Unified axis labels centered across the 2x2 grid (one shared x, one shared y).
-    fig.supxlabel('Pruning Percentage (%)', fontsize=12, fontweight='bold', x=0.46, y=0.03)
-    fig.supylabel('Composition (%)', fontsize=12, fontweight='bold', x=0.035, y=0.53)
-    # Single legend to the right of the whole grid (kept inside the 6 in width).
-    fig.legend(legend_handles, CATEGORIES, fontsize=8, loc='center left',
-               bbox_to_anchor=(0.70, 0.5))
-    # Manual margins -> saved file is exactly 6x5 in (no bbox_inches='tight').
-    fig.subplots_adjust(left=0.15, right=0.70, bottom=0.14, top=0.91,
-                        wspace=0.22, hspace=0.62)
+    # Hide any unused cells and put the shared legend in the last empty one.
+    for idx in range(len(method_names), axes.size):
+        axes[idx // n_cols][idx % n_cols].axis('off')
+
+    # One shared x label, one shared y label, one legend in the empty cell.
+    fig.supxlabel('Pruning Percentage (%)', fontsize=12, fontweight='bold')
+    fig.supylabel('Composition (%)', fontsize=12, fontweight='bold')
+    legend_ax = axes[(len(method_names)) // n_cols][(len(method_names)) % n_cols]
+    legend_ax.legend(legend_handles, CATEGORIES, fontsize=10, loc='center',
+                     frameon=False, title='Category', title_fontsize=11)
 
     output_path = FIGURES_DIR / 'normalized_category_composition.png'
     plt.savefig(output_path, dpi=300)
