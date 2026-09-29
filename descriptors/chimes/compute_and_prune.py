@@ -1,8 +1,15 @@
 """
 FPS-based structure pruning using ChIMES descriptors.
 
+Structure descriptor = the frame's ChIMES energy row divided by natoms, i.e. the
+per-atom average of every 2/3/4-body cluster basis sum (one value per ChIMES
+parameter). This is rotation-invariant and is the ChIMES analogue of an averaged
+bispectrum/SOAP vector. The A-matrix force rows are NOT aggregated with mean+std:
+their across-atom mean is identically zero (Newton's third law), so after
+standardization that half of the vector would be pure round-off noise.
+
 Prerequisites:
-    1. Generate frames_descriptors.pkl by running process_raw_descriptors.py first.
+    1. Generate chimes_raw.npz by running process_raw_descriptors.py first.
     2. data.json must be present at the project root (../../data.json).
 
 Run from this directory:
@@ -18,7 +25,6 @@ from sklearn.metrics import pairwise_distances
 import numpy as np
 import random
 import os
-import pickle
 
 
 def structure_level_pruning(data, structure_descriptors_scaled, fps_ranking, pruning_ratio):
@@ -50,68 +56,25 @@ def main():
     data = loadfn("../../data.json")
     print(f"Loaded {len(data)} structures")
 
-    # Cache the RAW (pre-standardization) mean+std descriptor matrix in this folder
-    # so the aggregation runs only once; delete the .npy to force a rebuild. (This
-    # assumes every data.json entry has a matching ChIMES frame, which holds for the
-    # tracked dataset; delete the cache to re-run the frame-index matching.)
-    cache = "structure_descriptors_mean_std.npy"
-    if os.path.exists(cache):
-        print(f"Loading cached ChIMES descriptors from {cache}")
-        mean_std_descriptors = np.load(cache)
-        if len(mean_std_descriptors) != len(data):
-            raise ValueError(
-                f"Cached ChIMES rows ({len(mean_std_descriptors)}) != n structures "
-                f"({len(data)}); delete {cache} to rebuild.")
-        matched_indices = list(range(len(data)))
-    else:
-        print("Loading ChIMES frame descriptors...")
-        with open("frames_descriptors.pkl", "rb") as f:
-            frame_descriptors = pickle.load(f)
-        print(f"Loaded {len(frame_descriptors)} frame matrices")
-
-        # Match data.json entries to descriptor matrices via frame_index field
-        mean_std_descriptors = []
-        matched_indices = []
-        frames_with_zero_std = []
-
-        for i, d in enumerate(data):
-            frame_index = d.get("frame_index", i)
-            if frame_index not in frame_descriptors:
-                print(f"Warning: frame index {frame_index} not found; skipping entry {i}")
-                continue
-
-            matrix = np.array(frame_descriptors[frame_index])
-            mean_desc = np.mean(matrix, axis=0)
-            std_desc = np.std(matrix, axis=0)
-
-            if np.any(std_desc == 0):
-                zero_count = int(np.sum(std_desc == 0))
-                frames_with_zero_std.append((frame_index, zero_count))
-
-            mean_std_descriptors.append(np.concatenate([mean_desc, std_desc]))
-            matched_indices.append(i)
-
-        mean_std_descriptors = np.array(mean_std_descriptors)
-        print(f"Matched {len(mean_std_descriptors)} descriptors out of {len(data)}")
-
-        if frames_with_zero_std:
-            print(f"Warning: {len(frames_with_zero_std)} frames have zero-std descriptor components.")
-
-        np.save(cache, mean_std_descriptors)
-        print(f"Cached raw descriptors -> {cache}  shape={mean_std_descriptors.shape}")
+    raw = np.load("chimes_raw.npz")
+    natoms = raw["natoms"]
+    # data.json has no frame_index; A-matrix frames are in data.json order.
+    # Guard that alignment with the per-frame atom counts.
+    if len(natoms) != len(data) or any(len(d["structure"]) != n for d, n in zip(data, natoms)):
+        raise ValueError("ChIMES frames do not align with data.json (atom counts differ)")
+    energy_per_atom = raw["energy_rows"] / natoms[:, None]
+    np.save("structure_descriptors_energy_per_atom.npy", energy_per_atom)
+    print(f"ChIMES energy-per-atom descriptors: shape={energy_per_atom.shape}")
 
     # Standardize; guard against zero-std columns
-    mean = np.mean(mean_std_descriptors, axis=0)
-    std = np.std(mean_std_descriptors, axis=0)
+    mean = np.mean(energy_per_atom, axis=0)
+    std = np.std(energy_per_atom, axis=0)
     std[std == 0] = 1.0
-    structure_descriptors_scaled = (mean_std_descriptors - mean) / std
-    structure_descriptors_scaled = np.nan_to_num(structure_descriptors_scaled, nan=0.0)
-
-    data_matched = [data[i] for i in matched_indices]
+    structure_descriptors_scaled = (energy_per_atom - mean) / std
 
     pruning_ratios = [0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09,
                       0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-    aggregation_method = 'mean_std'
+    aggregation_method = 'energy_per_atom'
     n_replicates = 10
 
     output_dir = "replicates_structure_pruning_modified"
@@ -135,10 +98,8 @@ def main():
         print(f"FPS ranking computed: {len(fps_ranking)} structures")
 
         for ratio in pruning_ratios:
-            print(f"\nPruning to {ratio:.0%} retention...")
-
             pruned_data, selection_info = structure_level_pruning(
-                data_matched, structure_descriptors_scaled, fps_ranking, pruning_ratio=ratio
+                data, structure_descriptors_scaled, fps_ranking, pruning_ratio=ratio
             )
             selection_info['random_seed'] = replicate_seeds[replicate_idx]
             selection_info['aggregation'] = aggregation_method

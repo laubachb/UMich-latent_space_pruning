@@ -7,7 +7,7 @@ Provides:
   * DESCRIPTOR_BUILDERS    — registry of structure-level featurizers, one per
                              descriptor space. Each builder lazily imports its
                              heavy dependencies, so a missing library (dscribe,
-                             maml, LAMMPS, a ChIMES pkl, ...) only skips that one
+                             maml, LAMMPS, ChIMES npz, ...) only skips that one
                              descriptor instead of breaking the whole analysis.
   * compute_descriptor_matrix() / cache helpers
 
@@ -30,7 +30,6 @@ for _v in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
     os.environ.setdefault(_v, "1")
 
 import re
-import pickle
 from pathlib import Path
 
 import numpy as np
@@ -247,20 +246,19 @@ def build_bispectrum(data):
 
 
 def build_chimes(data):
-    pkl = ROOT_DIR / "descriptors" / "chimes" / "frames_descriptors.pkl"
-    if not pkl.exists():
-        raise FileNotFoundError(f"{pkl} not found (run chimes process_raw_descriptors.py)")
-    with open(pkl, "rb") as f:
-        frame_descriptors = pickle.load(f)
-    feats = []
-    for i, d in enumerate(data):
-        frame_index = d.get("frame_index", i)
-        if frame_index is None:
-            frame_index = i
-        if frame_index not in frame_descriptors:
-            raise KeyError(f"ChIMES frame index {frame_index} missing; cannot align descriptors")
-        feats.append(_mean_std(frame_descriptors[frame_index]))
-    return np.array(feats)
+    """ChIMES energy row / natoms (per-atom cluster basis sums).
+
+    Mirrors descriptors/chimes/compute_and_prune.py. The A-matrix force rows are
+    not mean+std aggregated: their across-atom mean is identically zero."""
+    npz = ROOT_DIR / "descriptors" / "chimes" / "chimes_raw.npz"
+    if not npz.exists():
+        raise FileNotFoundError(f"{npz} not found (run chimes process_raw_descriptors.py)")
+    raw = np.load(npz)
+    natoms = raw["natoms"]
+    # A-matrix frames are in data.json order; guard the alignment by atom count
+    if len(natoms) != len(data) or any(len(d["structure"]) != n for d, n in zip(data, natoms)):
+        raise ValueError("ChIMES frames do not align with data.json (atom counts differ)")
+    return raw["energy_rows"] / natoms[:, None]
 
 
 DESCRIPTOR_BUILDERS = {

@@ -28,7 +28,7 @@ MLIP performance is quantified in low-data regimes. Work out of Develop branch.
 ```
 
 > **Not committed (see `.gitignore`):** `data.json`, all `replicates_structure_pruning_modified/`
-> output directories, `frames_descriptors.pkl`, `natoms.txt`.
+> output directories, ChIMES A matrices (`A.txt`), `natoms.txt`, `chimes_raw.npz`.
 
 ---
 
@@ -115,12 +115,13 @@ and gitignored).
 | SOAP | `dscribe` | `r_cut=5.0 Å`, `n_max=9`, `l_max=9` |
 | Behler-Parrinello | `maml` + LAMMPS | `cutoff=5.5 Å`, two-body + angular terms |
 | Bispectrum | `maml` + LAMMPS | `rcutfac=4.9`, `twojmax=8` |
-| ChIMES | pre-computed | Requires `A.txt` from a ChIMES calculation |
+| ChIMES | pre-computed | Energy row / natoms from a ChIMES `A.txt` |
 | Euler Characteristic | `numpy` + `ase` | Topological ECC, `R_MAX=6.0 Å`, `N_BINS=64` |
 
-SOAP, Behler-Parrinello, Bispectrum and ChIMES are *per-atom* descriptors,
+SOAP, Behler-Parrinello and Bispectrum are *per-atom* descriptors,
 aggregated to structure level via **mean + std** concatenation, then standardized
-before FPS. The Euler characteristic is an intrinsically *structure-level*
+before FPS. ChIMES uses the per-atom average of its cluster basis sums (the
+A-matrix energy row divided by the atom count; see below). The Euler characteristic is an intrinsically *structure-level*
 topological quantity, so no atomic aggregation is applied — the per-frame Euler
 characteristic curve is standardized directly. Ten replicates with different random
 seeds are run per descriptor to quantify variability.
@@ -131,11 +132,18 @@ seeds are run per descriptor to quantify variability.
 
 ChIMES descriptors are generated externally and require two raw files:
 
-- `descriptors/chimes/A.txt` — atomic descriptor matrix from a ChIMES run
-- `descriptors/chimes/natoms.txt` — number of atoms per frame
+- `descriptors/chimes/A.txt` — least-squares design matrix (A matrix) from a ChIMES run
+- `descriptors/chimes/natoms.txt` — atom count of each A-matrix row's frame (one line per row)
 
-Run `process_raw_descriptors.py` once to convert these into
-`frames_descriptors.pkl`, then run `compute_and_prune.py`.
+Both are large and gitignored; A matrices must never be committed.
+
+Each frame's block in `A.txt` is 3·natoms force rows followed by 3 identical
+energy rows; frames are in `data.json` order (checked by atom count).
+`process_raw_descriptors.py` validates this layout and writes `chimes_raw.npz`;
+`compute_and_prune.py` then uses **energy row / natoms** as the structure
+descriptor. The force rows are deliberately *not* mean+std aggregated: per
+parameter they sum to zero over atoms (Newton's third law), so their mean is
+identically zero and, after standardization, would contribute only noise.
 
 ---
 
@@ -183,5 +191,4 @@ across all 10 FPS replicates.
 `data.json` is a monty-serialized list of dicts, each with:
 - `"structure"` — pymatgen `Structure` object
 - `"description"` — string label (used for category analysis)
-- `"frame_index"` — integer index (used by ChIMES to match descriptors)
 - `"energy"`, `"forces"`, `"stress"` — DFT reference labels

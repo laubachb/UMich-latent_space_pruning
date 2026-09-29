@@ -1,6 +1,9 @@
 # ── Raw ChIMES descriptor inputs (large; generated externally) ─────────────────
+# Never commit A matrices, wherever they live
 descriptors/chimes/natoms.txt
-descriptors/chimes/A.txt
+A.txt
+*_A.txt
+A_*.txt
 
 # ── Generated outputs (descriptor + FPS pruning runs) ─────────────────────────
 descriptors/*/replicates_structure_pruning_modified/
@@ -11,6 +14,8 @@ random_replicates_structure_pruning/
 
 # ── Intermediate descriptor files ─────────────────────────────────────────────
 descriptors/chimes/frames_descriptors.pkl
+descriptors/chimes/chimes_raw.npz
+*.log
 
 # Cached raw (pre-standardization) structure-descriptor matrices written by each
 # descriptors/*/compute_and_prune.py so the expensive descriptor evaluation runs
