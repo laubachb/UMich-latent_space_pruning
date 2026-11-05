@@ -22,6 +22,7 @@ results/slurm_*.log
 results/*/analysis/distance_histograms.csv
 results/*/analysis/embeddings.csv
 results/*/analysis/quests.csv
+results/*/analysis/label_coverage.csv
 # tracked: results/<ds>/selection/*.json (selections), results/<ds>/analysis/{composition,
 # dimensionality,distance_selection}.csv, results/<ds>/descriptors/*.json (provenance)
 
