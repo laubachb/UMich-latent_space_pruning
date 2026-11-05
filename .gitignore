@@ -49,3 +49,6 @@ build/
 .claude/
 .DS_Store
 *.log
+
+# maml/LAMMPS scratch directories (created in the working directory)
+tmp*/
