@@ -22,6 +22,8 @@ dependencies = [
     # maml still does `import pkg_resources`, which setuptools removed in v81.
     # Keep setuptools below 81 or the Bispectrum/Behler describers fail to import.
     "setuptools<81",
+    "quests==2026.2.22",
+    "umap-learn==0.5.9.post2",
 ]
 
 # Analysis repo, not an installable library: install the dependencies but do not

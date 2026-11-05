@@ -141,33 +141,6 @@ def _mean_std(atomic_descriptors):
     return np.concatenate([a.mean(axis=0), a.std(axis=0)])
 
 
-def build_euler(data):
-    """Euler characteristic curve (topological). numpy + ase only.
-
-    Mirrors descriptors/euler/compute_and_prune.py so the clustering package is
-    self-contained (that script imports skmatter at module scope, so it cannot be
-    imported here without the FPS dependency)."""
-    R_MAX, N_BINS = 6.0, 64
-    radii = np.linspace(0.0, R_MAX, N_BINS)
-
-    feats = []
-    for i, d in enumerate(data):
-        print(f"  euler {i + 1}/{len(data)}", end="\r")
-        atoms = _pymatgen_to_ase(d["structure"])
-        n = len(atoms)
-        dist = atoms.get_all_distances(mic=True)
-        np.fill_diagonal(dist, np.inf)
-        chi = np.empty(len(radii))
-        for k, r in enumerate(radii):
-            adj = (dist <= r).astype(np.float64)
-            n_edges = adj.sum() / 2.0
-            n_triangles = np.trace(adj @ adj @ adj) / 6.0
-            chi[k] = n - n_edges + n_triangles
-        feats.append(chi / n)  # per-atom (intensive), comparable across cell sizes
-    print()
-    return np.array(feats)
-
-
 def build_soap(data):
     from dscribe.descriptors import SOAP
     soap = SOAP(species=["Si"], r_cut=5.0, n_max=9, l_max=9, periodic=True)
@@ -229,12 +202,16 @@ def build_behler(data):
 def build_bispectrum(data):
     _patch_maml_numpy2()
     from maml.describers import BispectrumCoefficients
+    # pot_fit=False: per-atom bispectrum rows (N x 55), aggregated by mean + std over atoms
+    # like SOAP/BP. pot_fit=True returns SNAP *fitting* rows instead (one per-atom-averaged
+    # energy row + 3N force-derivative rows); mean+std over those injects 1/(3N+1) atom-count
+    # factors that alone made the small surface cells outliers (fixed 2026-11-03).
     describer = BispectrumCoefficients(
         rcutfac=4.9,
         twojmax=8,
         element_profile={"Si": {"r": 0.5, "w": 1}},
         quadratic=False,
-        pot_fit=True,
+        pot_fit=False,
         include_stress=False,
     )
     feats = []
@@ -262,7 +239,6 @@ def build_chimes(data):
 
 
 DESCRIPTOR_BUILDERS = {
-    "euler": build_euler,
     "soap": build_soap,
     "behler": build_behler,
     "bispectrum": build_bispectrum,
@@ -272,7 +248,6 @@ DESCRIPTOR_BUILDERS = {
 # Human-readable display names for figures (acronyms/casing that .capitalize()
 # would get wrong, e.g. SOAP, ChIMES).
 DESCRIPTOR_LABELS = {
-    "euler": "Euler",
     "soap": "SOAP",
     "behler": "Behler",
     "bispectrum": "Bispectrum",
@@ -287,7 +262,6 @@ def descriptor_label(name: str) -> str:
 
 # Consistent colors for descriptors across all figures.
 DESCRIPTOR_COLORS = {
-    "euler": "#8338EC",
     "soap": "#3A86FF",
     "behler": "#06A77D",
     "bispectrum": "#F77F00",

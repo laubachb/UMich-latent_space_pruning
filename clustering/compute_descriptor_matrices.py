@@ -4,12 +4,11 @@ space, plus a shared per-frame metadata table.
 
 Descriptors whose dependencies are unavailable (dscribe, maml/LAMMPS, a ChIMES
 pkl, ...) are skipped with a warning so the analysis still runs on whatever is
-installed. In a bare environment only the topological `euler` descriptor (numpy
-+ ase) is guaranteed to succeed.
+installed.
 
 Run from this directory:
     python compute_descriptor_matrices.py            # all available descriptors
-    python compute_descriptor_matrices.py euler soap # a subset
+    python compute_descriptor_matrices.py soap chimes # a subset
 
 Outputs (clustering/cache/):
     <name>_descriptors.npy   raw (n_frames, n_features) matrix per descriptor

@@ -5,7 +5,7 @@ when curating training sets via Farthest Point Sampling (FPS). Four descriptor
 types are compared on identical silicon datasets, and their effect on downstream
 MLIP performance is quantified in low-data regimes. Work out of Develop branch.
 
-**Descriptors:** SOAP · Behler-Parrinello · Bispectrum · ChIMES · Euler Characteristic
+**Descriptors:** SOAP · Behler-Parrinello · Bispectrum · ChIMES
 
 ---
 
@@ -17,7 +17,6 @@ MLIP performance is quantified in low-data regimes. Work out of Develop branch.
 │   ├── behler/          Behler-Parrinello symmetry functions (maml)
 │   ├── bispectrum/      Bispectrum coefficients (maml + LAMMPS)
 │   ├── chimes/          ChIMES fingerprints (pre-computed descriptor file)
-│   ├── euler/           Euler characteristic curves (topological, numpy + ase)
 │   └── soap/            SOAP descriptors (dscribe)
 ├── analysis/
 │   └── normalized_category_composition.py   Main composition analysis figure
@@ -70,7 +69,6 @@ descriptor evaluation (delete the `.npy` to force a rebuild).
 cd descriptors/soap        && uv run python compute_and_prune.py && cd ../..
 cd descriptors/behler      && uv run python compute_and_prune.py && cd ../..   # needs LAMMPS
 cd descriptors/bispectrum  && uv run python compute_and_prune.py && cd ../..   # needs LAMMPS
-cd descriptors/euler       && uv run python compute_and_prune.py && cd ../..
 cd descriptors/chimes && uv run python process_raw_descriptors.py \
                        && uv run python compute_and_prune.py && cd ../..       # A.txt + natoms.txt
 
@@ -86,6 +84,17 @@ uv run python pruning/normalized_category_composition.py
 
 Reads the Behler / Bispectrum / SOAP / ChIMES replicate outputs and writes
 `figures/normalized_category_composition.png`.
+
+```bash
+uv run python pruning/quests_information_entropy.py
+```
+
+Scores every pruned cut (each FPS latent space + random) in one shared,
+descriptor-agnostic atomic space, the QUESTS representation (k=32, 5 Å cutoff,
+h=0.015 Å⁻¹). It plots H(cut)/H(full dataset) and the QUESTS coverage of the full
+dataset (fraction of atomic environments with δH ≤ 0) against retention %, as
+mean ± s.d. over replicates. Writes `figures/quests_information_entropy.png` and
+`clustering/cache/quests_entropy_by_retention.csv`.
 
 ### 4. Latent-space information & physics analysis
 
@@ -106,6 +115,27 @@ Each writes its figure(s) to `figures/` and small result tables to
 `clustering/cache/` (the large `*.npy` descriptor matrices there are regenerable
 and gitignored).
 
+### 5. Publication figures (gnuplot)
+
+```bash
+uv run python plotting/export_gnuplot_data.py     # writes plotting/data/*.dat
+cd plotting && gnuplot fig_umap.gp fig_composition.gp fig_information.gp fig_distance.gp
+```
+
+300 dpi PNGs land in `figures/` (drawn with the cairo PDF terminal, rasterized by `pdftoppm`):
+
+| Figure | Content |
+|---|---|
+| `fig_umap_latent_spaces.png` | UMAP (min_dist=0.9, seed 42) of the four standardized structure-level latent spaces, colored by structure category |
+| `fig_dataset_composition.png` | Category composition of the pruned sets vs retention (pooled over 10 replicates), random + each FPS latent space |
+| `fig_dataset_information.png` | QUESTS (a) diversity D/D_full, (b) coverage, (c) entropy H/H_full vs retention (mean ± s.d.) |
+| `fig_distance_analysis.png` | Per latent space: max-normalized interpoint distances stacked by category (top) and each category's mean distance to the other frames vs its FPS enrichment at ≤10 % retention, with Spearman ρ (bottom) |
+| `fig_toc.png` | TOC graphic: 2D PCA of each latent space (distance-preserving, r ≥ 0.97) with the FPS 5 % picks circled → GAP / NNP / SNAP / ChIMES → "Nominal Error" panel (**schematic** curves until model results are in) |
+
+Run steps 2–4 first (the exporter reads the FPS cuts, `clustering/cache/*_descriptors.npy`
+and `clustering/cache/quests_entropy_by_retention.csv`). Shared fonts and palettes live in
+`plotting/style.gp`.
+
 ---
 
 ## Descriptor Details
@@ -116,15 +146,12 @@ and gitignored).
 | Behler-Parrinello | `maml` + LAMMPS | `cutoff=5.5 Å`, two-body + angular terms |
 | Bispectrum | `maml` + LAMMPS | `rcutfac=4.9`, `twojmax=8` |
 | ChIMES | pre-computed | Energy row / natoms from a ChIMES `A.txt` |
-| Euler Characteristic | `numpy` + `ase` | Topological ECC, `R_MAX=6.0 Å`, `N_BINS=64` |
 
 SOAP, Behler-Parrinello and Bispectrum are *per-atom* descriptors,
 aggregated to structure level via **mean + std** concatenation, then standardized
 before FPS. ChIMES uses the per-atom average of its cluster basis sums (the
-A-matrix energy row divided by the atom count; see below). The Euler characteristic is an intrinsically *structure-level*
-topological quantity, so no atomic aggregation is applied — the per-frame Euler
-characteristic curve is standardized directly. Ten replicates with different random
-seeds are run per descriptor to quantify variability.
+A-matrix energy row divided by the atom count; see below). Ten replicates with
+different random seeds are run per descriptor to quantify variability.
 
 ---
 
@@ -144,45 +171,6 @@ energy rows; frames are in `data.json` order (checked by atom count).
 descriptor. The force rows are deliberately *not* mean+std aggregated: per
 parameter they sum to zero over atoms (Newton's third law), so their mean is
 identically zero and, after standardization, would contribute only noise.
-
----
-
-## Euler Characteristic Workflow
-
-The Euler characteristic descriptor is computed directly from atomic geometry — no
-external descriptor library or pre-processing step is required, only `numpy` and
-`ase` (already needed for SOAP).
-
-For each frame, a periodic **Vietoris–Rips filtration** is built over the atomic
-point cloud using minimum-image distances, and the Euler characteristic
-
-```
-chi(r) = V - E(r) + T(r)
-```
-
-is recorded on a fixed radius grid, where `V` = number of atoms, `E(r)` = atom
-pairs within `r`, and `T(r)` = triangles whose three edges are all within `r`.
-Sampling `chi(r)` on the grid gives one **Euler characteristic curve (ECC)** per
-frame — a comparable, structure-level feature vector that is standardized and fed
-to FPS exactly like the other descriptors.
-
-Key parameters at the top of `descriptors/euler/compute_and_prune.py`:
-
-| Parameter | Default | Meaning |
-|---|---|---|
-| `R_MAX` | `6.0` Å | Largest filtration radius (spans several Si coordination shells) |
-| `N_BINS` | `64` | Number of radii sampled → descriptor dimension |
-| `NORMALIZE_PER_ATOM` | `True` | Divide `chi(r)` by atom count so mixed cell sizes are comparable |
-
-Run from its directory:
-
-```bash
-cd descriptors/euler
-python compute_and_prune.py
-```
-
-Because the ECC is deterministic, the descriptors are computed once and reused
-across all 10 FPS replicates.
 
 ---
 

@@ -52,3 +52,9 @@ build/
 writing/
 random_for_ben/
 figures/*.png
+# gnuplot publication figures (plotting/) are tracked
+!figures/fig_*.png
+
+# Superseded bispectrum (pot_fit=True) FPS cuts + caches, kept for provenance
+descriptors/*/archive_*.tar.gz
+descriptors/*/*_fps_replicates_*.tar.gz

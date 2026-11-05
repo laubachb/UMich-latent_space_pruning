@@ -65,12 +65,16 @@ def compute_descriptors(data, aggregation_method='mean_std'):
         print(f"Computing Bispectrum descriptors with {aggregation_method} aggregation...")
         _patch_maml_numpy2()
         structures = [d["structure"] for d in data]
+        # pot_fit=False: per-atom bispectrum rows (N x 55), aggregated by mean + std over atoms
+        # like SOAP/BP. pot_fit=True returns SNAP *fitting* rows instead (one per-atom-averaged
+        # energy row + 3N force-derivative rows); mean+std over those injects 1/(3N+1) atom-count
+        # factors that alone made the small surface cells outliers (fixed 2026-11-03).
         describer = BispectrumCoefficients(
             rcutfac=4.9,
             twojmax=8,
             element_profile=ELEMENT_PROFILE,
             quadratic=False,
-            pot_fit=True,
+            pot_fit=False,
             include_stress=False,
         )
         structure_descriptors = []

@@ -27,8 +27,7 @@ from sklearn.decomposition import PCA
 import common
 from distance_by_category import categorize, CATEGORY_ORDER, CATEGORY_COLORS
 
-# Four descriptor spaces -> 2x2 grid (matches the pruning-study set; euler,
-# which is clustering-only, is intentionally left out of the 2x2).
+# Four descriptor spaces -> 2x2 grid (the pruning-study set).
 PANEL_DESCRIPTORS = ["behler", "bispectrum", "soap", "chimes"]
 
 
