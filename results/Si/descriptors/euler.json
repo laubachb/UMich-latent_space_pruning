@@ -1,0 +1,14 @@
+{
+ "dataset": "Si",
+ "descriptor": "euler",
+ "shape": [
+  214,
+  64
+ ],
+ "seconds": 0.6,
+ "params": {
+  "r_max": 6.0,
+  "n_bins": 64
+ },
+ "n_nan_rows": 0
+}
