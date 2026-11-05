@@ -1,0 +1,14 @@
+{
+ "dataset": "Si",
+ "descriptor": "mtp",
+ "shape": [
+  214,
+  1728
+ ],
+ "seconds": 12.7,
+ "params": {
+  "level": 24,
+  "cutoff": 4.7
+ },
+ "n_nan_rows": 0
+}

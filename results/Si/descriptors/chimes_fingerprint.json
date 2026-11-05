@@ -1,0 +1,15 @@
+{
+ "dataset": "Si",
+ "descriptor": "chimes_fingerprint",
+ "shape": [
+  214,
+  300
+ ],
+ "seconds": 457.7,
+ "params": {
+  "alpha": 1.0,
+  "params_file": "params.txt",
+  "bins": 100
+ },
+ "n_nan_rows": 0
+}

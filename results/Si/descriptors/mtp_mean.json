@@ -1,0 +1,11 @@
+{
+ "dataset": "Si",
+ "descriptor": "mtp_mean",
+ "shape": [
+  214,
+  864
+ ],
+ "seconds": 0.5,
+ "params": {},
+ "n_nan_rows": 0
+}

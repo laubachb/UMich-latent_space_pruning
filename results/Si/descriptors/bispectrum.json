@@ -1,0 +1,16 @@
+{
+ "dataset": "Si",
+ "descriptor": "bispectrum",
+ "shape": [
+  214,
+  110
+ ],
+ "seconds": 124.4,
+ "params": {
+  "rcutfac": 4.9,
+  "twojmax": 8,
+  "r": 0.5,
+  "w": 1
+ },
+ "n_nan_rows": 0
+}

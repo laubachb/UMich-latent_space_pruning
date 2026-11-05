@@ -1,0 +1,13 @@
+{
+ "dataset": "Si",
+ "descriptor": "chimes",
+ "shape": [
+  214,
+  473
+ ],
+ "seconds": 0.4,
+ "params": {
+  "descriptor": "energy_row_per_atom"
+ },
+ "n_nan_rows": 0
+}

@@ -1,0 +1,16 @@
+{
+ "dataset": "Si",
+ "descriptor": "soap",
+ "shape": [
+  214,
+  648
+ ],
+ "seconds": 7.9,
+ "params": {
+  "r_cut": 5.4,
+  "n_max": 8,
+  "l_max": 8,
+  "sigma": 0.5
+ },
+ "n_nan_rows": 0
+}
