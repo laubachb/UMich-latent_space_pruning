@@ -64,8 +64,17 @@ def run(dataset: str, methods: list[str] | None = None) -> pd.DataFrame:
     print(f"[{dataset}] H(full) = {h_full:.4f}, D(full) = {d_full:.4f} nats over {x.shape[0]} atoms")
     methods = methods or selection.available(dataset)
     out = paths.results_dir(dataset, "analysis") / "quests.csv"
-    done = pd.read_csv(out) if out.exists() else pd.DataFrame()
+    try:                                   # resume from the checkpoint; a job killed mid-write can leave it empty
+        done = pd.read_csv(out) if out.exists() and out.stat().st_size > 0 else pd.DataFrame()
+    except (pd.errors.EmptyDataError, pd.errors.ParserError):
+        done = pd.DataFrame()
     rows = [] if done.empty else done.to_dict("records")
+
+    def checkpoint(frame):
+        tmp = out.with_suffix(".csv.tmp")
+        frame.to_csv(tmp, index=False)
+        tmp.replace(out)                   # atomic: the checkpoint is never left half-written
+
     have = {(r["method"], r["percent"], r["replicate"]) for r in rows}
     t0 = time.time()
     for m in methods:
@@ -78,8 +87,8 @@ def run(dataset: str, methods: list[str] | None = None) -> pd.DataFrame:
             rows.append(dict(method=m, percent=p, replicate=r + 1, n_frames=len(idx), n_atoms=sub.shape[0],
                              H=hh, D=dd, H_rel=hh / h_full, D_rel=dd / d_full, coverage=coverage(x, sub, h),
                              H_full=h_full, D_full=d_full))
-        pd.DataFrame(rows).to_csv(out, index=False)          # checkpoint after every method
+        checkpoint(pd.DataFrame(rows))                       # after every method
         print(f"[{dataset}] quests '{m}' done ({time.time() - t0:.0f} s)", flush=True)
     df = pd.DataFrame(rows).sort_values(["method", "percent", "replicate"])
-    df.to_csv(out, index=False)
+    checkpoint(df)
     return df

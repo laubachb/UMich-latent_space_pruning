@@ -18,7 +18,7 @@ module load intel-classic/2021.6.0 mvapich2/2.3.7 >/dev/null 2>&1   # libmpi for
 export MPLBACKEND=Agg
 export TMPDIR=/tmp/$USER/lsp_$SLURM_JOB_ID
 mkdir -p "$TMPDIR"
-export OMP_NUM_THREADS=8 NUMBA_NUM_THREADS=56
+export OMP_NUM_THREADS=8 NUMBA_NUM_THREADS=112
 echo "== $DS on $(hostname) $(date)"
 .venv/bin/python scripts/run_pipeline.py "$DS" --skip-failures ${STAGES:+--stage $STAGES} ${EXTRA:-} 2>&1 \
     | grep -v "pkg_resources\|UserWarning" | tee results/$DS/logs/pipeline_$SLURM_JOB_ID.log
