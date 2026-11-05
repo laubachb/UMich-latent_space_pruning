@@ -20,6 +20,14 @@ hyperparameters of that paper's expert-optimised models.
 | `euler` | Euler characteristic curve of the periodic Rips filtration (0–6 Å, 64 radii) | — (topological reference) | chi(r)/N, no atomic averaging |
 | `<id>_mean` | per-atom **mean** only of any atom-centred descriptor above | | design row / N, the aggregation a linear / average-kernel model sees |
 
+**Paper convention (decided 2026-11-05): the atom-centred spaces enter the paper as
+their per-atom mean** (`soap_mean`, `behler_mean`, `bispectrum_mean`, `mtp_mean`;
+export tags `<ds>_mean[_<sampler>]`). The mean + std concatenation of the original
+Si study is kept as a sensitivity variant: its std block adds a descriptor-independent
+heterogeneity axis that inflates FPS surface enrichment by ~25 % (4.9× vs 3.9× at
+≤ 10 % retention, averaged over Si/Ge/Li/Mo) while retaining no more information
+(QUESTS D at 5 %: 0.69 vs 0.70); the 10 % cuts of the two variants overlap by only 30–70 %.
+
 **Samplers** (applied identically in every latent space, 10 replicate seeds × 18
 retentions 1–9 %, 10–90 %): `fps` farthest point sampling (extreme-seeking, nested
 cuts), `kmedoids` k-means medoids (density-representative), `leverage` randomized
