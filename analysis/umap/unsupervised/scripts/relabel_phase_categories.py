@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
 """
-Build unsupervised/data/data_phase_categories.json from data.json.
+Write the two label sets of every Si frame to unsupervised/data/data_phase_categories.json.
 
-Adds parallel labels without changing geometries or DFT outputs:
-  - category       : legacy categorize_structure(...)
-  - phase_category : categorize_phase(...)  (Diamond / Liquid / Vacancy-* / Surface)
+Labels only (no geometries or DFT outputs, which live in the mlearn training.json):
+  - index           : frame index in external/mlearn/Si/training.json
+  - description     : the mlearn description
+  - group           : the mlearn group (AIMD-NVT / Vacancy / Elastic / Surface)
+  - category        : legacy categorize_structure(...)
+  - phase_category  : categorize_phase(...)  (Diamond / Liquid / Vacancy-* / Surface)
+
+The figure generator applies the same rules directly, so this file is a readable record
+of the labelling, not an input.
 
 Run from repo root:
     python analysis/umap/unsupervised/scripts/relabel_phase_categories.py
@@ -19,38 +25,27 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 UNSUP_DIR = SCRIPT_DIR.parent
-UMAP_DIR = UNSUP_DIR.parent
-ROOT_DIR = UMAP_DIR.parents[1]
-sys.path.insert(0, str(ROOT_DIR / "analysis"))
+sys.path.insert(0, str(SCRIPT_DIR))
 
+import umap_helpers as h  # noqa: E402
 from categorization import categorize_phase, categorize_structure  # noqa: E402
 
-SRC = ROOT_DIR / "data.json"
 DST = UNSUP_DIR / "data" / "data_phase_categories.json"
 
 
 def main() -> None:
-    if not SRC.is_file():
-        sys.exit(f"Missing {SRC}")
-
-    DST.parent.mkdir(parents=True, exist_ok=True)
-
-    with SRC.open() as f:
-        data = json.load(f)
-
+    frames = h.load_frames()
     out = []
-    for entry in data:
+    for i, entry in enumerate(frames):
         desc = entry.get("description") or ""
-        new_entry = dict(entry)
-        new_entry["category"] = categorize_structure(desc)
-        new_entry["phase_category"] = categorize_phase(desc, entry.get("group"))
-        out.append(new_entry)
-
+        out.append(dict(index=i, description=desc, group=entry.get("group"),
+                        category=categorize_structure(desc),
+                        phase_category=categorize_phase(desc, entry.get("group"))))
+    DST.parent.mkdir(parents=True, exist_ok=True)
     with DST.open("w") as f:
-        json.dump(out, f, indent=2)
-
+        json.dump(out, f, indent=1)
     counts = Counter(e["phase_category"] for e in out)
-    print(f"Wrote {DST} ({len(out)} structures)")
+    print(f"Wrote {DST} ({len(out)} frames)")
     for cat, n in counts.most_common():
         print(f"  {cat}: {n}")
 

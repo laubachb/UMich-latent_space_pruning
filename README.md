@@ -64,7 +64,7 @@ plotting/                 gnuplot figure scripts (parametric in the dataset) + m
 tests/                    test_legacy_si.py (exact reproduction of the original Si study),
                           test_quests_frame_kernel.py (fast QUESTS scoring vs direct evaluation)
 models/                   notes for the downstream potential fits
-analysis/                 unsupervised UMAP study of the original Si pipeline (see below)
+analysis/                 unsupervised UMAP study of the Si latent spaces (see below)
 external/                 UNTRACKED inputs: mlearn/<El>/training.json, chimes/<El>/{A.txt,...}
 results/<ds>/             descriptors/ (npy caches, ignored), selection/ (tracked),
                           selection_export/ (tracked), analysis/ (small csv tracked)
@@ -168,16 +168,13 @@ cold→hot, bulk hot→cold, Strained.
 
 ## Unsupervised UMAP study (`analysis/umap/`)
 
-A separate visualization study contributed by @Yanjun-Lyu (pull request #18): UMAP
-embeddings of the Si latent spaces coloured by structure category, phase and energy,
-with shared labelling rules in `analysis/categorization.py`. Its own READMEs
-(`analysis/umap/README.md`, `analysis/umap/unsupervised/README.md`) describe how to run it;
-it reads `data.json` (the Si `training.json`) from the repository root. It builds its
-descriptors with the original Si pipeline's definitions — mean + std aggregation, the
-bispectrum fitting rows (`pot_fit=True`) and the ChIMES frame pickle of the original
-`descriptors/chimes/` scripts, which are in the git history at commit `5075c14` — not
-with the corrected per-element definitions in `lsp/` used for the manuscript figures
-(`figures/<El>_mean*/fig_umap_latent_spaces.png`).
+A visualization study contributed by @Yanjun-Lyu (pull request #18): UMAP embeddings of
+the seven Si latent spaces coloured by structure category, by phase (strained /
+unstrained diamond, liquid, vacancies, surface) and by energy per atom, with shared
+labelling rules in `analysis/categorization.py`. It embeds the `lsp` latent spaces
+(`results/Si/descriptors/`), i.e. the same per-atom-mean and structure-level
+descriptors as the manuscript; its first version used the original Si pipeline's
+descriptors and was updated on 2026-11-05. See `analysis/umap/unsupervised/README.md`.
 
 ## Provenance of the Si study
 

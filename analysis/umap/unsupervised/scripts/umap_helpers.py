@@ -1,47 +1,41 @@
 #!/usr/bin/env python3
 """
-Helpers for unsupervised baseline UMAPs: descriptor load/compute, UMAP, plotting.
+Helpers for unsupervised baseline UMAPs: descriptor loading, UMAP, plotting.
+
+Descriptors are NOT computed here. They are the structure-level latent spaces of the
+manuscript, built and cached by the `lsp` package (results/<ds>/descriptors/<space>.npy;
+computed on first use from configs/<ds>.json): the per-atom mean of SOAP,
+Behler-Parrinello, bispectrum and MTP, the ChIMES A-matrix energy row / N, the
+full-frame ChIMES fingerprint (alpha = 1) and the Euler characteristic curve.
 """
 
 from __future__ import annotations
 
-import os
 import sys
 from pathlib import Path
-from shutil import which
 
 import matplotlib.pyplot as plt
 import numpy as np
 import umap
-from ase import Atoms
-from dscribe.descriptors import SOAP
 from matplotlib.lines import Line2D
-from pymatgen.core import Structure
-from sklearn.preprocessing import StandardScaler
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 UNSUP_DIR = SCRIPT_DIR.parent
 UMAP_DIR = UNSUP_DIR.parent
 ROOT_DIR = UMAP_DIR.parents[1]
-CACHE_DIR = UMAP_DIR / "descriptor_cache"
-CACHE_PATH = CACHE_DIR / "structure_descriptors.npz"
-CHIMES_PKL = ROOT_DIR / "descriptors" / "chimes" / "frames_descriptors.pkl"
 
+sys.path.insert(0, str(ROOT_DIR))
 sys.path.insert(0, str(ROOT_DIR / "analysis"))
 from categorization import (  # noqa: E402
     CATEGORIES,
     PHASE_CATEGORIES,
 )
+from lsp import config as lsp_config  # noqa: E402
+from lsp import data as lsp_data  # noqa: E402
+from lsp import descriptors as lsp_desc  # noqa: E402
 
+DATASET = "Si"
 UMAP_COMMON = dict(n_components=2, min_dist=0.9, random_state=42)
-SOAP_PARAMS = dict(
-    species=["Si"],
-    periodic=True,
-    r_cut=5.1,
-    n_max=8,
-    l_max=8,
-    average="off",
-)
 
 CATEGORY_COLORS = {
     "Strained": "#E63946",
@@ -62,220 +56,25 @@ PHASE_CATEGORY_COLORS = {
 }
 
 
-def ensure_lammps_on_path() -> None:
-    """Prepend Homebrew LAMMPS bins so maml can find lmp_serial."""
-    candidates = [
-        "/opt/homebrew/bin",
-        "/opt/homebrew/Cellar/lammps/20250722-update4/bin",
-        "/opt/homebrew/Cellar/lammps/20250722-update1/bin",
-        "/usr/local/bin",
-    ]
-    path = os.environ.get("PATH", "")
-    for p in reversed(candidates):
-        if Path(p).is_dir() and p not in path.split(os.pathsep):
-            path = p + os.pathsep + path
-    os.environ["PATH"] = path
+def latent_spaces(dataset: str = DATASET) -> list[str]:
+    """Latent-space ids in figure order, with the manuscript's per-atom-mean aggregation."""
+    cfg = lsp_config.load(dataset)
+    return [n + "_mean" if n in lsp_desc.ATOMIC else n for n in cfg["descriptors"]]
 
 
-def pymatgen_to_ase(structure: Structure) -> Atoms:
-    symbols = [site.species_string for site in structure]
-    positions = structure.cart_coords
-    cell = structure.lattice.matrix
-    return Atoms(symbols=symbols, positions=positions, cell=cell, pbc=True)
+def load_frames(dataset: str = DATASET) -> list:
+    """Frames of the dataset (mlearn training.json; see scripts/fetch_mlearn_data.py)."""
+    return lsp_data.load_frames(dataset)
 
 
-def aggregate_atomic_descriptors(atomic_descriptors, method: str = "mean_std"):
-    if method == "mean":
-        return np.mean(atomic_descriptors, axis=0)
-    if method == "mean_std":
-        return np.concatenate(
-            [np.mean(atomic_descriptors, axis=0), np.std(atomic_descriptors, axis=0)]
-        )
-    if method == "sum":
-        return np.sum(atomic_descriptors, axis=0)
-    raise ValueError(f"Unknown aggregation method: {method}")
-
-
-def _lammps_on_path() -> bool:
-    return any(
-        which(name) is not None
-        for name in ("lmp_serial", "lmp_mpi", "lmp", "lammps", "lammps_serial")
-    )
-
-
-def compute_soap_descriptors(structures):
-    print("Computing SOAP descriptors...")
-    soap = SOAP(**SOAP_PARAMS)
-    out = []
-    for i, structure in enumerate(structures):
-        print(f"  SOAP {i + 1}/{len(structures)}", end="\r")
-        atomic = soap.create(pymatgen_to_ase(structure))
-        out.append(aggregate_atomic_descriptors(atomic, method="mean_std"))
-    print()
-    return np.array(out)
-
-
-def compute_behler_descriptors(structures):
-    print("Computing Behler descriptors...")
-    from maml.describers import BPSymmetryFunctions
-
-    ensure_lammps_on_path()
-    describer = BPSymmetryFunctions(
-        cutoff=5.5,
-        r_etas=[0.01, 0.02, 0.05],
-        r_shift=[4.0],
-        a_etas=[0.01, 0.02, 0.05],
-        zetas=[1.0, 16.0, 2.0, 4.0],
-        lambdas=[1, -1],
-    )
-    out = []
-    for i, structure in enumerate(structures):
-        print(f"  Behler {i + 1}/{len(structures)}", end="\r")
-        atomic = describer.transform_one(structure).values
-        out.append(aggregate_atomic_descriptors(atomic, method="mean_std"))
-    print()
-    return np.array(out)
-
-
-def compute_bispectrum_descriptors(structures):
-    print("Computing Bispectrum descriptors...")
-    from maml.describers import BispectrumCoefficients
-
-    ensure_lammps_on_path()
-    describer = BispectrumCoefficients(
-        rcutfac=4.9,
-        twojmax=8,
-        element_profile={"Si": {"r": 0.5, "w": 1}},
-        quadratic=False,
-        pot_fit=True,
-        include_stress=False,
-    )
-    out = []
-    for i, structure in enumerate(structures):
-        print(f"  Bispectrum {i + 1}/{len(structures)}", end="\r")
-        atomic = describer.transform_one(structure).values
-        out.append(aggregate_atomic_descriptors(atomic, method="mean_std"))
-    print()
-    return np.array(out)
-
-
-def compute_chimes_descriptors(n_structures: int, data: list | None = None):
-    """
-    Load precomputed ChIMES frame matrices and aggregate mean+std per structure.
-
-    Matches descriptors/chimes/compute_and_prune.py: frame_index defaults to
-    list index when absent. Each frame matrix is (3*natoms, n_features).
-    """
-    import pickle
-
-    if not CHIMES_PKL.is_file():
-        raise FileNotFoundError(
-            f"Missing {CHIMES_PKL}. Run descriptors/chimes/process_raw_descriptors.py first."
-        )
-    print(f"Loading ChIMES descriptors from {CHIMES_PKL}...")
-    with CHIMES_PKL.open("rb") as f:
-        frame_descriptors = pickle.load(f)
-
-    out = []
-    for i in range(n_structures):
-        frame_index = i
-        if data is not None:
-            frame_index = data[i].get("frame_index", i)
-        if frame_index not in frame_descriptors:
-            raise KeyError(f"ChIMES frame_index {frame_index} not in {CHIMES_PKL.name}")
-        matrix = np.asarray(frame_descriptors[frame_index], dtype=float)
-        if np.isnan(matrix).any():
-            matrix = np.nan_to_num(matrix, nan=0.0)
-        out.append(aggregate_atomic_descriptors(matrix, method="mean_std"))
-    arr = np.array(out)
-    arr = np.nan_to_num(arr, nan=0.0)
-    print(f"  ChIMES structure descriptors: {arr.shape}")
-    return arr
-
-
-def _save_descriptor_cache(descriptors: dict) -> None:
-    payload = {}
-    if "Behler Symmetry Functions" in descriptors:
-        payload["behler"] = descriptors["Behler Symmetry Functions"]
-    if "SOAP" in descriptors:
-        payload["soap"] = descriptors["SOAP"]
-    if "Bispectrum" in descriptors:
-        payload["bispectrum"] = descriptors["Bispectrum"]
-    if "ChIMES" in descriptors:
-        payload["chimes"] = descriptors["ChIMES"]
-    if payload:
-        np.savez(CACHE_PATH, **payload)
-        print(f"Cached descriptors ({', '.join(payload)}) to {CACHE_PATH}")
-
-
-def _resolve_cache_path() -> Path:
-    """Prefer descriptor_cache/; fall back to legacy .cache/ name."""
-    if CACHE_PATH.exists():
-        return CACHE_PATH
-    legacy = UMAP_DIR / ".cache" / "descriptors_cache.npz"
-    if legacy.exists():
-        print(f"Note: using legacy cache path {legacy}")
-        print(f"      (preferred location is {CACHE_PATH})")
-        return legacy
-    return CACHE_PATH
-
-
-def load_or_compute_descriptors(
-    structures,
-    force_recompute: bool = False,
-    data: list | None = None,
-):
-    CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    descriptors: dict = {}
-    cache_path = _resolve_cache_path()
-
-    if cache_path.exists() and not force_recompute:
-        print(f"Loading cached descriptors from {cache_path}")
-        cache = np.load(cache_path)
-        if "behler" in cache.files:
-            descriptors["Behler Symmetry Functions"] = cache["behler"]
-        if "soap" in cache.files:
-            descriptors["SOAP"] = cache["soap"]
-        if "bispectrum" in cache.files:
-            descriptors["Bispectrum"] = cache["bispectrum"]
-        if "chimes" in cache.files:
-            descriptors["ChIMES"] = cache["chimes"]
-
-    ensure_lammps_on_path()
-
-    if "SOAP" not in descriptors:
-        descriptors["SOAP"] = compute_soap_descriptors(structures)
-        _save_descriptor_cache(descriptors)
-
-    if "ChIMES" not in descriptors:
-        try:
-            descriptors["ChIMES"] = compute_chimes_descriptors(len(structures), data=data)
-            _save_descriptor_cache(descriptors)
-        except Exception as exc:
-            print(f"WARNING: ChIMES failed ({exc})")
-
-    if not _lammps_on_path():
-        print(
-            "WARNING: LAMMPS executable not on PATH — skipping Behler/Bispectrum. "
-            "Need lmp_serial / lmp_mpi (Homebrew) or lmp."
-        )
-        return descriptors
-
-    if "Behler Symmetry Functions" not in descriptors:
-        try:
-            descriptors["Behler Symmetry Functions"] = compute_behler_descriptors(structures)
-            _save_descriptor_cache(descriptors)
-        except Exception as exc:
-            print(f"WARNING: Behler failed ({exc})")
-
-    if "Bispectrum" not in descriptors:
-        try:
-            descriptors["Bispectrum"] = compute_bispectrum_descriptors(structures)
-            _save_descriptor_cache(descriptors)
-        except Exception as exc:
-            print(f"WARNING: Bispectrum failed ({exc})")
-
-    return descriptors
+def load_descriptors(dataset: str = DATASET, force_recompute: bool = False) -> dict[str, np.ndarray]:
+    """{panel title: raw (n_frames, n_features) matrix} for every latent space, from the lsp cache."""
+    out = {}
+    for name in latent_spaces(dataset):
+        X = lsp_desc.compute(dataset, name, force=force_recompute)
+        out[lsp_desc.label(lsp_desc.split_name(name)[0])] = X
+        print(f"  {name}: {X.shape}")
+    return out
 
 
 def compute_umap_embedding(
@@ -287,7 +86,8 @@ def compute_umap_embedding(
     n_components: int | None = None,
     y: np.ndarray | None = None,
 ) -> np.ndarray:
-    scaled = StandardScaler().fit_transform(descriptors)
+    ok = np.isfinite(descriptors).all(axis=1)       # frames without a descriptor get NaN coordinates
+    scaled = lsp_desc.standardize(descriptors[ok])
     params = {**UMAP_COMMON, "init": init}
     if min_dist is not None:
         params["min_dist"] = min_dist
@@ -298,14 +98,13 @@ def compute_umap_embedding(
     if n_components is not None:
         params["n_components"] = n_components
     reducer = umap.UMAP(**params)
-    if y is None:
-        return reducer.fit_transform(scaled)
-    return reducer.fit_transform(scaled, y=y)
+    emb = np.full((len(descriptors), params["n_components"]), np.nan)
+    emb[ok] = reducer.fit_transform(scaled) if y is None else reducer.fit_transform(scaled, y=np.asarray(y)[ok])
+    return emb
 
 
 def _panel_order(descriptor_dict: dict) -> list[str]:
-    preferred = ["Behler Symmetry Functions", "SOAP", "Bispectrum", "ChIMES"]
-    return [k for k in preferred if k in descriptor_dict] or list(descriptor_dict)
+    return list(descriptor_dict)                     # insertion order = latent_spaces()
 
 
 def plot_descriptor_row(
@@ -345,6 +144,7 @@ def plot_category_row(
     embeddings: dict[str, np.ndarray],
     categories: list[str],
     titles: dict[str, str] | None = None,
+    legend_ax=None,
 ):
     names = _panel_order(embeddings)
     cats = np.asarray(categories)
@@ -379,7 +179,9 @@ def plot_category_row(
         for cat in CATEGORIES
         if cat in cats
     ]
-    axes[-1].legend(handles=handles, loc="best", fontsize=9, frameon=True, title="Category")
+    lax = legend_ax if legend_ax is not None else axes[-1]
+    lax.legend(handles=handles, loc="center" if legend_ax is not None else "best", fontsize=9,
+               frameon=legend_ax is None, title="Category")
 
 
 def plot_phase_category_row(
@@ -387,6 +189,7 @@ def plot_phase_category_row(
     embeddings: dict[str, np.ndarray],
     phase_categories: list[str],
     titles: dict[str, str] | None = None,
+    legend_ax=None,
 ):
     """Color by full phase categories."""
     names = _panel_order(embeddings)
@@ -422,6 +225,6 @@ def plot_phase_category_row(
         for cat in PHASE_CATEGORIES
         if cat in cats
     ]
-    axes[-1].legend(
-        handles=handles, loc="best", fontsize=9, frameon=True, title="Phase category"
-    )
+    lax = legend_ax if legend_ax is not None else axes[-1]
+    lax.legend(handles=handles, loc="center" if legend_ax is not None else "best", fontsize=9,
+               frameon=legend_ax is None, title="Phase category")
