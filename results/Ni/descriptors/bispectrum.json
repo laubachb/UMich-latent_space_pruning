@@ -1,0 +1,16 @@
+{
+ "dataset": "Ni",
+ "descriptor": "bispectrum",
+ "shape": [
+  263,
+  110
+ ],
+ "seconds": 151.5,
+ "params": {
+  "rcutfac": 4.1,
+  "twojmax": 8,
+  "r": 0.5,
+  "w": 1
+ },
+ "n_nan_rows": 0
+}

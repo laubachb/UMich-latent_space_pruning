@@ -1,0 +1,11 @@
+{
+ "dataset": "Ni",
+ "descriptor": "bispectrum_mean",
+ "shape": [
+  263,
+  55
+ ],
+ "seconds": 0.1,
+ "params": {},
+ "n_nan_rows": 0
+}

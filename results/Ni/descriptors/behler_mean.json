@@ -1,0 +1,11 @@
+{
+ "dataset": "Ni",
+ "descriptor": "behler_mean",
+ "shape": [
+  263,
+  27
+ ],
+ "seconds": 0.0,
+ "params": {},
+ "n_nan_rows": 0
+}

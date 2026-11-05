@@ -1,0 +1,13 @@
+{
+ "dataset": "Ni",
+ "descriptor": "chimes",
+ "shape": [
+  263,
+  611
+ ],
+ "seconds": 1.0,
+ "params": {
+  "descriptor": "energy_row_per_atom"
+ },
+ "n_nan_rows": 0
+}

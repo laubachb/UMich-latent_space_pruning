@@ -1,0 +1,14 @@
+{
+ "dataset": "Ni",
+ "descriptor": "euler",
+ "shape": [
+  263,
+  64
+ ],
+ "seconds": 1.9,
+ "params": {
+  "r_max": 6.0,
+  "n_bins": 64
+ },
+ "n_nan_rows": 0
+}

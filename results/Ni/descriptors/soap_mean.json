@@ -1,0 +1,11 @@
+{
+ "dataset": "Ni",
+ "descriptor": "soap_mean",
+ "shape": [
+  263,
+  324
+ ],
+ "seconds": 0.4,
+ "params": {},
+ "n_nan_rows": 0
+}

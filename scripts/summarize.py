@@ -46,7 +46,7 @@ def summarize(dataset: str, sampler: str) -> list[dict]:
     cats = [c for c in comp.columns if c not in ("method", "percent", "n_pooled")]
     full = comp[(comp.method == "random") & (comp.percent == 100)].iloc[0]
     rows = []
-    for m in selection.available(dataset, sampler):
+    for m in ["random"] + [x for x in selection.available(dataset, sampler) if x != "random"]:
         s, name = selection.split_method(m)
         row = dict(dataset=dataset, sampler=s, space=name or "random", label=descriptors.label(name or "random"))
         if name and dim is not None and name in dim.index:

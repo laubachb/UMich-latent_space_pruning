@@ -1,0 +1,14 @@
+{
+ "dataset": "Ni",
+ "descriptor": "mtp",
+ "shape": [
+  263,
+  576
+ ],
+ "seconds": 35.6,
+ "params": {
+  "level": 20,
+  "cutoff": 4.0
+ },
+ "n_nan_rows": 0
+}
