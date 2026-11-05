@@ -98,7 +98,9 @@ def readme(datasets, percents, n_rep):
         "is the third FPS replicate in the SOAP (per-atom mean) latent space keeping 10 % (26 frames) of the Cu training set.", "",
         "## File format", "",
         "Each file is a JSON list of frames in the mlearn format (monty-serialisable): `structure` (pymatgen Structure dict), "
-        "`outputs` {`energy` eV (total), `forces` eV/A (n_atoms x 3), `virial_stress` (6, kbar, Voigt)}, `description`, "
+        "`outputs` {`energy` eV (total), `forces` eV/A (n_atoms x 3), `virial_stress` (6 components in the VASP order "
+        "xx, yy, zz, xy, yz, xz, as stored by mlearn; the magnitudes are consistent with VASP's kB, but the unit and sign "
+        "convention are not documented in the source files, so verify them before fitting to stresses)}, `description`, "
         "`group` (AIMD-NVT / Vacancy / Elastic / Surface), `num_atoms`, `element`, `tag`. Load with "
         "`monty.serialization.loadfn` (or `json.load` + `pymatgen.core.Structure.from_dict`). "
         "`<El>/<El>_full_training_set.json` is the complete training set in the same format; `manifest.csv` lists every "
