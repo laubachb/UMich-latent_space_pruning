@@ -58,7 +58,13 @@ def main():
         selection.run(a.dataset, "random", force=a.force)
         for s in a.sampler:
             for n in [n for n in names if n in descriptors.available(a.dataset)]:
-                selection.run(a.dataset, s, n, force=a.force)
+                try:
+                    selection.run(a.dataset, s, n, force=a.force)
+                except Exception:
+                    if not a.skip_failures:
+                        raise
+                    traceback.print_exc()
+                    print(f"[{a.dataset}] !! selection '{s}-{n}' failed, continuing", flush=True)
     if "analysis" in a.stage:
         methods = selection.available(a.dataset)
         avail = descriptors.available(a.dataset)

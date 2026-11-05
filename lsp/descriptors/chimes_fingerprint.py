@@ -16,7 +16,10 @@ Pipeline (both tools are external, see configs/local_paths.json):
      the alpha = 1.00 "centrality" lines are kept (at alpha = 1 the two
      composition-ranking variants coincide).
 
-Frames with fewer than two clusters in some body order have no fingerprint (NaN).
+A body order that the dataset's ChIMES fit does not include (e.g. Li 6/6/0 has no
+4-body term) produces no clusters for any frame; such blocks are dropped from the
+fingerprint (2b + 3b = 200 values). Frames with fewer than two clusters in a body
+order that the fit does include have no fingerprint (NaN).
 Cluster files are written to node-local scratch (TMPDIR) and only the histograms are
 kept, so no per-frame files land on the shared file system.
 """
@@ -123,6 +126,14 @@ def structure_descriptors(data, params: dict, element: str, chimes_dir: str | Pa
         print()
     finally:
         shutil.rmtree(cluster_dir, ignore_errors=True)
+    keep = []
+    for k, b in enumerate(("2b", "3b", "4b")):
+        blk = X[:, 100 * k:100 * (k + 1)]
+        if np.isfinite(blk).any():
+            keep.append(k)
+        else:
+            print(f"  {b} block undefined for every frame (no {b} term in this ChIMES fit): dropped")
+    X = np.concatenate([X[:, 100 * k:100 * (k + 1)] for k in keep], axis=1)
     bad = np.where(~np.isfinite(X).all(axis=1))[0]
     if len(bad):
         print(f"  WARNING: {len(bad)} frames without a complete fingerprint: {bad.tolist()}")
