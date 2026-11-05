@@ -56,3 +56,8 @@ tmp*/
 # exported training-subset archives (tens of GB; regenerate with scripts/export_training_subsets.py)
 results/*.tar.gz
 results/*.tar
+
+# outputs of the legacy-reproduction config (tests/test_legacy_si.py); regenerable
+results/si_legacy/
+figures/si_legacy*/
+plotting/data/si_legacy*/
