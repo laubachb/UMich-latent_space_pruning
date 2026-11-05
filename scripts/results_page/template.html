@@ -1,0 +1,238 @@
+<title>Latent-Space Pruning Results</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column (max 1180px) with a sticky control bar (element / sampler / aggregation); figures full width. */
+:root {
+  --bg: #fbfaf7;
+  --surface: #ffffff;
+  --fg: #1d2129;
+  --muted: #5d6470;
+  --line: #d9d7cf;
+  --accent: #b5421b;
+  --accent-soft: #f6e4dc;
+  --pill: #eef0f3;
+  --font-display: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15171b; --surface: #1e2127; --fg: #e8e6e0; --muted: #a2a7b0; --line: #353a43;
+    --accent: #f08a62; --accent-soft: #3a2a23; --pill: #2a2e36; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15171b; --surface: #1e2127; --fg: #e8e6e0; --muted: #a2a7b0; --line: #353a43;
+  --accent: #f08a62; --accent-soft: #3a2a23; --pill: #2a2e36; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 56px; }
+h1 { font-family: var(--font-display); font-weight: 600; font-size: clamp(26px, 3.2vw, 36px); line-height: 1.15; margin: 0 0 6px; text-wrap: balance; }
+h2 { font-family: var(--font-display); font-weight: 500; font-size: 21px; margin: 0; text-wrap: balance; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.lede { max-width: 72ch; color: var(--muted); margin: 10px 0 0; }
+.lede b { color: var(--fg); font-weight: 600; }
+.status { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 16px; font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
+.status span b { color: var(--fg); font-weight: 500; }
+
+.controls { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-block: 1px solid var(--line);
+  margin-top: 24px; padding-block: 12px; display: flex; flex-wrap: wrap; gap: 10px 28px; align-items: center; }
+.group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.group .eyebrow { margin-right: 4px; }
+.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--surface); }
+.seg button { font: 500 13.5px var(--font-body); color: var(--fg); background: transparent; border: 0; padding: 7px 14px; cursor: pointer; border-right: 1px solid var(--line); }
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+.seg button:disabled { color: var(--muted); cursor: not-allowed; opacity: 0.6; }
+.seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.seg.el button { font-family: var(--font-mono); font-weight: 500; min-width: 48px; }
+
+.method-note { margin: 18px 0 0; padding: 12px 16px; border-left: 3px solid var(--accent); background: var(--accent-soft); max-width: 78ch; border-radius: 0 6px 6px 0; }
+.method-note p { margin: 0; }
+
+.summary { margin-top: 28px; }
+.summary .head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; margin-bottom: 10px; }
+.summary .head p { margin: 0; color: var(--muted); max-width: 80ch; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 14px; font-variant-numeric: tabular-nums; }
+th, td { padding: 8px 12px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font-family: var(--font-mono); font-weight: 500; font-size: 12px; letter-spacing: 0.04em; color: var(--muted); text-transform: uppercase; }
+th:first-child, td:first-child { text-align: left; }
+tr:last-child td { border-bottom: 0; }
+td.sw { display: flex; align-items: center; gap: 8px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none; }
+td.hi { color: var(--accent); font-weight: 600; }
+.foot { font-size: 12.5px; color: var(--muted); margin-top: 8px; max-width: 90ch; }
+
+.figures { display: grid; gap: 36px; margin-top: 36px; }
+figure { margin: 0; display: grid; gap: 12px; }
+figure .head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 8px 28px; align-items: start; }
+figure .head p { margin: 0; color: var(--muted); max-width: 70ch; }
+figure .frame { border: 1px solid var(--line); background: #fff; border-radius: 6px; padding: 10px; }
+figure img { display: block; width: 100%; height: auto; max-width: 100%; }
+figure .file { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+@media (max-width: 720px) { figure .head { grid-template-columns: 1fr; } }
+
+.notes { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 18px; display: grid; gap: 10px; max-width: 80ch; }
+.notes p { margin: 0; color: var(--muted); }
+.notes code, .status code { font-family: var(--font-mono); font-size: 12.5px; color: var(--fg); background: var(--pill); padding: 1px 5px; border-radius: 4px; }
+@media (prefers-reduced-motion: no-preference) { .seg button { transition: background 120ms; } }
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">Descriptor-induced sampling bias · Zuo et al. 2020 benchmark datasets</div>
+  <h1>Latent-Space Pruning Results</h1>
+  <p class="lede">Seven latent spaces (SOAP, Behler–Parrinello, bispectrum, MTP, ChIMES A-matrix, ChIMES fingerprint, and the Euler characteristic curve as a topological reference) and a random baseline each select training subsets from the same pool of DFT frames. The three figures show <b>what each space picks</b> (category composition), <b>how much information the picks retain</b> (QUESTS, judged in one descriptor-agnostic atomic space), and <b>why</b> (category isolation in the latent space against selection enrichment). Atom-centred descriptors (SOAP, Behler–Parrinello, bispectrum, MTP) enter as their <b>per-atom mean</b>, the linear design row divided by N. Choose an element and a subsampling rule.</p>
+  <div class="status" id="status"></div>
+
+  <div class="controls" role="toolbar" aria-label="Figure selection">
+    <div class="group">
+      <span class="eyebrow">Element</span>
+      <div class="seg el" id="elementSeg"></div>
+    </div>
+    <div class="group">
+      <span class="eyebrow">Sampler</span>
+      <div class="seg" id="samplerSeg">
+        <button type="button" data-sampler="fps" aria-pressed="true">FPS</button>
+        <button type="button" data-sampler="kmedoids" aria-pressed="false">k-medoids</button>
+        <button type="button" data-sampler="leverage" aria-pressed="false">Leverage</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="method-note" id="methodNote"><p></p></div>
+
+  <section class="summary">
+    <div class="head">
+      <h2 id="summaryTitle"></h2>
+      <p id="summaryLede"></p>
+    </div>
+    <div class="tablewrap">
+      <table id="summaryTable">
+        <thead><tr><th>Latent space</th><th>Surface ≤10 % (%)</th><th>Strained ≤10 % (%)</th><th>ρ (isolation → enrichment)</th><th>D(S)/D(full) at 5 %</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="foot">Highlighted cells: surface share above twice its dataset share, strained share above 1.5× its dataset share, ρ ≥ 0.85, and diversity above the random baseline at 5 %. ρ is computed across the dataset's structure categories (7–9 per element).</p>
+  </section>
+
+  <div class="figures">
+    <figure>
+      <div class="head">
+        <h2>Category composition vs retention</h2>
+        <p>Stacked share of each structure category in the pooled cuts. Random stays at the dataset mix at every retention; a latent space is biased where its stack departs from the random panel. Watch the surface (magenta) and strained (green) bands at 1–10 %.</p>
+      </div>
+      <div class="frame"><img id="figComposition" src="" alt="Category composition of the selected training sets versus retention, one panel per latent space"></div>
+      <div class="file" id="fileComposition"></div>
+    </figure>
+    <figure>
+      <div class="head">
+        <h2>Information retained (QUESTS)</h2>
+        <p>(a) Diversity D(S)/D(full), the share of distinct atomic environments a cut keeps; (b) coverage, the fraction of all atomic environments that are not novel relative to the cut; (c) entropy H(S)/H(full), how uniformly the cut is spread. Mean ± s.d. over the ten replicates, random baseline dashed.</p>
+      </div>
+      <div class="frame"><img id="figInformation" src="" alt="QUESTS diversity, coverage and entropy of the cuts versus retention for each latent space"></div>
+      <div class="file" id="fileInformation"></div>
+    </figure>
+    <figure>
+      <div class="head">
+        <h2>Latent distance and enrichment</h2>
+        <p>Top: distribution of max-normalised interpoint distances in each space, stacked by the category of the source frame. Bottom: each category's mean distance to the other frames against its enrichment in the ≤ 10 % cuts (share in cut / share in dataset), with Spearman ρ. Categories far from everything else are the ones an extreme-seeking sampler picks first.</p>
+      </div>
+      <div class="frame"><img id="figDistance" src="" alt="Latent-space distance distributions by category and the relation between category isolation and selection enrichment"></div>
+      <div class="file" id="fileDistance"></div>
+    </figure>
+  </div>
+
+  <div class="notes">
+    <p><b>Samplers.</b> FPS: greedy max-min (random first point), nested cuts, extreme-seeking. k-medoids: k-means with k = cut size, one medoid per cluster, density-representative. Leverage: frames drawn without replacement with probability proportional to their statistical leverage in the 90 %-variance principal subspace (randomized CUR). Same ten seeds for every sampler, space and element; 18 retentions (1–9, 10–90 %).</p>
+    <p><b>Aggregation.</b> Atom-centred descriptors are aggregated to one vector per frame by the per-atom mean, i.e. the descriptor's linear design row divided by N, which is what a linear or average-kernel model (SNAP, MTP, ChIMES, GAP) actually sees. The ChIMES A-matrix space is a per-atom mean by construction; the ChIMES fingerprint and the Euler characteristic curve (chi(r)/N of the periodic Rips filtration, 0–6 Å) are whole-frame descriptors. The earlier mean + std concatenation adds a descriptor-independent heterogeneity axis (large for any inhomogeneous cell) that inflates surface enrichment by about 25 %; it is kept in the repository as a sensitivity variant (export tags without <code>_mean</code>) but not shown here.</p>
+    <p><b>Hyperparameters.</b> Each element uses the settings of the expert-optimised GAP / NNP / SNAP / MTP models of Zuo et al. (per-element cutoffs; MTP levels 16–24) and T. Sundberg's ChIMES fits for the A-matrix and fingerprint spaces. The Behler η values are the paper's Å⁻² numbers (n2p2 Bohr⁻² inputs converted). Li's ChIMES fit has no 4-body term, so its fingerprint is 2b + 3b only, and its 22 smallest cells have too few 3-body clusters and are excluded from that one space. Repository: <code>UMich-latent_space_pruning</code>, branch <code>laubachb/multi-dataset</code>, <code>results/&lt;El&gt;/</code>.</p>
+  </div>
+</div>
+
+<script>
+(function () {
+  var DATA = __DATA__;
+  var ORDER = ["Si", "Ge", "Li", "Mo", "Cu", "Ni"];
+  var atomic = { soap: 1, behler: 1, bispectrum: 1, mtp: 1 };
+  var notes = {
+    fps: "Farthest point sampling ranks every frame by greedy max-min distance, so the first picks are the most isolated frames of each space. Which category that is depends on the space: compare the surface (magenta) and strained (green) bands of the panels against the random panel.",
+    kmedoids: "k-medoids places one representative per k-means cluster. It samples the dense regions rather than their edges: the first cuts track the dataset mix more closely, surface enrichment shrinks, and the isolation–enrichment correlation ρ weakens or disappears.",
+    leverage: "Leverage sampling draws frames in proportion to their statistical leverage in the 90 %-variance principal subspace (randomized CUR). It behaves like a softened FPS: extremes are favoured but not forced, so biases keep their direction at lower amplitude."
+  };
+  var titles = { fps: "FPS", kmedoids: "k-medoids", leverage: "leverage sampling" };
+  var available = ORDER.filter(function (e) { return DATA[e] && DATA[e].tags.length; });
+  var state = { el: available[0], sampler: "fps", agg: "_mean" };
+
+  function tag() { return state.el + state.agg + (state.sampler === "fps" ? "" : "_" + state.sampler); }
+  function fmt(v, d) { return v === null || v === undefined ? "–" : v.toFixed(d); }
+  function render() {
+    var ds = DATA[state.el], t = tag();
+    var ok = ds.tags.indexOf(t) >= 0;
+    [["figComposition", "fileComposition", "fig_dataset_composition"], ["figInformation", "fileInformation", "fig_dataset_information"],
+     ["figDistance", "fileDistance", "fig_distance_analysis"]].forEach(function (f) {
+      document.getElementById(f[0]).src = ok ? t + "/" + f[2] + ".png" : "";
+      document.getElementById(f[1]).textContent = (ok ? "figures/" : "not yet rendered: figures/") + t + "/" + f[2] + ".png";
+    });
+    document.getElementById("methodNote").firstElementChild.textContent = notes[state.sampler];
+    document.getElementById("summaryTitle").textContent = ds.element + ": low-retention selection, " + titles[state.sampler] +
+      "";
+    document.getElementById("summaryLede").textContent = "Share of surface and strained frames in the pooled cuts at ≤ 10 % retention (full " +
+      ds.element + " dataset: " + fmt(ds.full.surface, 1) + " % surface, " + fmt(ds.full.strained, 1) +
+      " % strained), Spearman ρ between a category's mean latent distance to other frames and its enrichment, and QUESTS diversity retained at 5 %.";
+    document.getElementById("status").innerHTML = "";
+    [["element", ds.element], ["frames", ds.n_frames], ["categories", ds.categories.length + " (" + ds.categories.join(", ") + ")"],
+     ["replicates", "10 seeds × 18 retentions"], ["run", "2026-11-05"]].forEach(function (s) {
+      var sp = document.createElement("span"); sp.appendChild(document.createTextNode(s[0] + " "));
+      var b = document.createElement("b"); b.textContent = s[1]; sp.appendChild(b);
+      document.getElementById("status").appendChild(sp);
+    });
+    var tb = document.querySelector("#summaryTable tbody");
+    tb.innerHTML = "";
+    var rows = [["random", "Random", "#555555"]].concat(ds.spaces);
+    rows.forEach(function (s) {
+      var key = s[0] === "random" ? "random" : state.sampler + "-" + s[0] + (atomic[s[0]] ? state.agg : "");
+      var v = ds.methods[key] || [null, null, null, null];
+      var tr = document.createElement("tr");
+      var name = document.createElement("td"); name.className = "sw";
+      var dot = document.createElement("span"); dot.className = "dot"; dot.style.background = s[2];
+      name.appendChild(dot); name.appendChild(document.createTextNode(s[1]));
+      tr.appendChild(name);
+      var cells = [[fmt(v[0], 1), v[0] !== null && v[0] > 2 * ds.full.surface], [fmt(v[1], 1), v[1] !== null && v[1] > 1.5 * ds.full.strained],
+                   [fmt(v[2], 2), v[2] !== null && v[2] >= 0.85],
+                   [fmt(v[3], 3), v[3] !== null && s[0] !== "random" && ds.full.D5random !== null && v[3] > ds.full.D5random]];
+      cells.forEach(function (c) { var td = document.createElement("td"); td.textContent = c[0]; if (c[1]) td.className = "hi"; tr.appendChild(td); });
+      tb.appendChild(tr);
+    });
+  }
+  function press(segId, attr, value) {
+    Array.prototype.forEach.call(document.getElementById(segId).querySelectorAll("button"), function (x) {
+      x.setAttribute("aria-pressed", x.getAttribute(attr) === value ? "true" : "false");
+    });
+  }
+  function wire(segId, attr, key) {
+    var seg = document.getElementById(segId);
+    seg.addEventListener("click", function (e) {
+      var b = e.target.closest("button"); if (!b || b.disabled) return;
+      state[key] = b.getAttribute(attr);
+      press(segId, attr, state[key]);
+      render();
+      try { localStorage.setItem("lsp-" + key, state[key]); } catch (err) {}
+    });
+  }
+  var elSeg = document.getElementById("elementSeg");
+  ORDER.forEach(function (e) {
+    var b = document.createElement("button"); b.type = "button"; b.setAttribute("data-el", e); b.textContent = e;
+    if (available.indexOf(e) < 0) { b.disabled = true; b.title = "no results yet"; }
+    elSeg.appendChild(b);
+  });
+  try {
+    var e = localStorage.getItem("lsp-el"), s = localStorage.getItem("lsp-sampler");
+    if (e && available.indexOf(e) >= 0) state.el = e;
+    if (s && notes[s]) state.sampler = s;
+  } catch (err) {}
+  press("elementSeg", "data-el", state.el); press("samplerSeg", "data-sampler", state.sampler);
+  wire("elementSeg", "data-el", "el"); wire("samplerSeg", "data-sampler", "sampler");
+  render();
+})();
+</script>
