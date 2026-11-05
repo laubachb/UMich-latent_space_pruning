@@ -1,0 +1,16 @@
+{
+ "dataset": "Li",
+ "descriptor": "soap",
+ "shape": [
+  241,
+  648
+ ],
+ "seconds": 6.7,
+ "params": {
+  "r_cut": 4.8,
+  "n_max": 8,
+  "l_max": 8,
+  "sigma": 0.5
+ },
+ "n_nan_rows": 0
+}

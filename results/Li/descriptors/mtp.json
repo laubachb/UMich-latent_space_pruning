@@ -1,0 +1,14 @@
+{
+ "dataset": "Li",
+ "descriptor": "mtp",
+ "shape": [
+  241,
+  184
+ ],
+ "seconds": 7.6,
+ "params": {
+  "level": 16,
+  "cutoff": 5.1
+ },
+ "n_nan_rows": 0
+}

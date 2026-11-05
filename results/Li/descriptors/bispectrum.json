@@ -1,0 +1,16 @@
+{
+ "dataset": "Li",
+ "descriptor": "bispectrum",
+ "shape": [
+  241,
+  110
+ ],
+ "seconds": 131.3,
+ "params": {
+  "rcutfac": 5.1,
+  "twojmax": 8,
+  "r": 0.5,
+  "w": 1
+ },
+ "n_nan_rows": 0
+}

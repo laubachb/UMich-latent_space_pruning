@@ -1,0 +1,15 @@
+{
+ "dataset": "Li",
+ "descriptor": "chimes_fingerprint",
+ "shape": [
+  241,
+  200
+ ],
+ "seconds": 66.9,
+ "params": {
+  "alpha": 1.0,
+  "params_file": "params.txt",
+  "bins": 100
+ },
+ "n_nan_rows": 22
+}

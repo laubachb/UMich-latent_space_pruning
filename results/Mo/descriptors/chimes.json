@@ -1,0 +1,13 @@
+{
+ "dataset": "Mo",
+ "descriptor": "chimes",
+ "shape": [
+  194,
+  489
+ ],
+ "seconds": 0.5,
+ "params": {
+  "descriptor": "energy_row_per_atom"
+ },
+ "n_nan_rows": 0
+}

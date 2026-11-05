@@ -1,0 +1,16 @@
+{
+ "dataset": "Mo",
+ "descriptor": "bispectrum",
+ "shape": [
+  194,
+  60
+ ],
+ "seconds": 101.3,
+ "params": {
+  "rcutfac": 4.6,
+  "twojmax": 6,
+  "r": 0.5,
+  "w": 1
+ },
+ "n_nan_rows": 0
+}

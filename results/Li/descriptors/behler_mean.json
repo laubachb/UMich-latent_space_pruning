@@ -1,0 +1,11 @@
+{
+ "dataset": "Li",
+ "descriptor": "behler_mean",
+ "shape": [
+  241,
+  117
+ ],
+ "seconds": 0.1,
+ "params": {},
+ "n_nan_rows": 0
+}

@@ -1,0 +1,15 @@
+{
+ "dataset": "Mo",
+ "descriptor": "chimes_fingerprint",
+ "shape": [
+  194,
+  300
+ ],
+ "seconds": 48.2,
+ "params": {
+  "alpha": 1.0,
+  "params_file": "params.txt",
+  "bins": 100
+ },
+ "n_nan_rows": 4
+}

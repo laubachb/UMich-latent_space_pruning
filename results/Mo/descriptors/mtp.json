@@ -1,0 +1,14 @@
+{
+ "dataset": "Mo",
+ "descriptor": "mtp",
+ "shape": [
+  194,
+  576
+ ],
+ "seconds": 7.4,
+ "params": {
+  "level": 20,
+  "cutoff": 5.2
+ },
+ "n_nan_rows": 0
+}

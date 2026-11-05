@@ -1,0 +1,14 @@
+{
+ "dataset": "Ge",
+ "descriptor": "euler",
+ "shape": [
+  228,
+  64
+ ],
+ "seconds": 0.4,
+ "params": {
+  "r_max": 6.0,
+  "n_bins": 64
+ },
+ "n_nan_rows": 0
+}

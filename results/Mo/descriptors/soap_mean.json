@@ -1,0 +1,11 @@
+{
+ "dataset": "Mo",
+ "descriptor": "soap_mean",
+ "shape": [
+  194,
+  324
+ ],
+ "seconds": 0.2,
+ "params": {},
+ "n_nan_rows": 0
+}

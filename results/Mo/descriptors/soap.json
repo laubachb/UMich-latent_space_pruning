@@ -1,0 +1,16 @@
+{
+ "dataset": "Mo",
+ "descriptor": "soap",
+ "shape": [
+  194,
+  648
+ ],
+ "seconds": 5.5,
+ "params": {
+  "r_cut": 5.2,
+  "n_max": 8,
+  "l_max": 8,
+  "sigma": 0.5
+ },
+ "n_nan_rows": 0
+}

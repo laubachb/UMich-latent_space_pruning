@@ -1,0 +1,11 @@
+{
+ "dataset": "Li",
+ "descriptor": "mtp_mean",
+ "shape": [
+  241,
+  92
+ ],
+ "seconds": 0.1,
+ "params": {},
+ "n_nan_rows": 0
+}

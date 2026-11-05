@@ -1,0 +1,11 @@
+{
+ "dataset": "Mo",
+ "descriptor": "mtp_mean",
+ "shape": [
+  194,
+  288
+ ],
+ "seconds": 0.1,
+ "params": {},
+ "n_nan_rows": 0
+}
