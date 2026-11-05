@@ -82,7 +82,7 @@ figure .file { font-family: var(--font-mono); font-size: 12px; color: var(--mute
 <div class="wrap">
   <div class="eyebrow">Descriptor-induced sampling bias · Zuo et al. 2020 benchmark datasets</div>
   <h1>Latent-Space Pruning Results</h1>
-  <p class="lede">Seven latent spaces (SOAP, Behler–Parrinello, bispectrum, MTP, ChIMES A-matrix, ChIMES fingerprint, and the Euler characteristic curve as a topological reference) and a random baseline each select training subsets from the same pool of DFT frames. The three figures show <b>what each space picks</b> (category composition), <b>how much information the picks retain</b> (QUESTS, judged in one descriptor-agnostic atomic space), and <b>why</b> (category isolation in the latent space against selection enrichment). Atom-centred descriptors (SOAP, Behler–Parrinello, bispectrum, MTP) enter as their <b>per-atom mean</b>, the linear design row divided by N. Choose an element and a subsampling rule.</p>
+  <p class="lede">Seven latent spaces (SOAP, Behler–Parrinello, bispectrum, MTP, ChIMES A-matrix, ChIMES fingerprint, and the Euler characteristic curve as a topological reference) and a random baseline each select training subsets from the same pool of DFT frames. The figures show <b>what each space picks</b> (category composition), <b>how much information the picks retain</b> (QUESTS, judged in one descriptor-agnostic atomic space), <b>why</b> (category isolation in the latent space against selection enrichment), <b>how different the spaces and their picks are</b> (cross-space geometry and cut overlap), and <b>whether the picks still cover the DFT labels</b> (label-space coverage). Atom-centred descriptors (SOAP, Behler–Parrinello, bispectrum, MTP) enter as their <b>per-atom mean</b>, the linear design row divided by N. Choose an element and a subsampling rule.</p>
   <div class="status" id="status"></div>
 
   <div class="controls" role="toolbar" aria-label="Figure selection">
@@ -141,6 +141,22 @@ figure .file { font-family: var(--font-mono); font-size: 12px; color: var(--mute
       <div class="frame"><img id="figDistance" src="" alt="Latent-space distance distributions by category and the relation between category isolation and selection enrichment"></div>
       <div class="file" id="fileDistance"></div>
     </figure>
+    <figure>
+      <div class="head">
+        <h2>Cross-space geometry and cut overlap</h2>
+        <p>(a) Rank correlation between the pairwise frame distances of two latent spaces: do they agree which frames are far apart? (b) Mean overlap of each frame's 10 nearest neighbours in two spaces: do they agree on local neighbourhoods? (c) Overlap of the selected training sets against retention for two different spaces (band: range over space pairs), for one space with another seed, and for two random cuts. Spaces that agree globally can still select very different training sets.</p>
+      </div>
+      <div class="frame"><img id="figCross" src="" alt="Distance-rank agreement and nearest-neighbour overlap between latent spaces, and overlap of the selected training sets versus retention"></div>
+      <div class="file" id="fileCross"></div>
+    </figure>
+    <figure>
+      <div class="head">
+        <h2>Label-space coverage</h2>
+        <p>Distance between the distribution of DFT labels in a cut and in the full training set (1-Wasserstein distance divided by the full set's standard deviation; 0 means identical) for (a) energy per atom, (b) per-atom force magnitude and (c) mean normal stress. If every latent space covers the labels about equally well, models fit to their cuts see the same range of energies, forces and stresses.</p>
+      </div>
+      <div class="frame"><img id="figLabels" src="" alt="Label-space coverage of the selected training sets versus retention for energy per atom, force magnitude and mean normal stress"></div>
+      <div class="file" id="fileLabels"></div>
+    </figure>
   </div>
 
   <div class="notes">
@@ -170,7 +186,8 @@ figure .file { font-family: var(--font-mono); font-size: 12px; color: var(--mute
     var ds = DATA[state.el], t = tag();
     var ok = ds.tags.indexOf(t) >= 0;
     [["figComposition", "fileComposition", "fig_dataset_composition"], ["figInformation", "fileInformation", "fig_dataset_information"],
-     ["figDistance", "fileDistance", "fig_distance_analysis"]].forEach(function (f) {
+     ["figDistance", "fileDistance", "fig_distance_analysis"], ["figCross", "fileCross", "fig_crossspace"],
+     ["figLabels", "fileLabels", "fig_label_coverage"]].forEach(function (f) {
       document.getElementById(f[0]).src = ok ? t + "/" + f[2] + ".png" : "";
       document.getElementById(f[1]).textContent = (ok ? "figures/" : "not yet rendered: figures/") + t + "/" + f[2] + ".png";
     });

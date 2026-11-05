@@ -37,7 +37,11 @@ baseline.
 **Analyses**: category composition of the cuts vs retention; QUESTS information
 (diversity, coverage, entropy) of every cut in one descriptor-agnostic atomic
 space; category-resolved distance distributions and their Spearman correlation
-with selection enrichment; UMAP/PCA embeddings; effective dimensionality.
+with selection enrichment; UMAP/PCA embeddings; effective dimensionality;
+cross-space comparison (distance-rank agreement and 10-NN overlap between spaces,
+overlap of the selected cuts vs retention: `fig_crossspace`); label-space coverage
+(W1/σ of energy per atom, force magnitudes and mean normal stress of every cut
+against the full set: `fig_label_coverage`).
 
 ---
 

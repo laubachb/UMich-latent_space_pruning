@@ -23,7 +23,8 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import artifact_data  # noqa: E402
 from lsp import config  # noqa: E402
 
-FIGS = ["fig_dataset_composition", "fig_dataset_information", "fig_distance_analysis"]
+FIGS = ["fig_dataset_composition", "fig_dataset_information", "fig_distance_analysis", "fig_crossspace",
+        "fig_label_coverage"]
 
 
 def main():

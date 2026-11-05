@@ -20,7 +20,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from lsp import config, data, descriptors, paths, selection  # noqa: E402
 
-FIGS = ["fig_dataset_composition", "fig_dataset_information", "fig_distance_analysis"]
+FIGS = ["fig_dataset_composition", "fig_dataset_information", "fig_distance_analysis", "fig_crossspace",
+        "fig_label_coverage"]
 
 
 def coarse_share(row, cats, prefix):

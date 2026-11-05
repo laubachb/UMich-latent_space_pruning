@@ -10,7 +10,8 @@ Stages
     descriptors   every latent space in configs/<ds>.json plus the per-atom-mean variants
     selection     every sampler (fps, kmedoids, leverage; 25 replicates) in every latent
                   space + the random baseline
-    analysis      composition, QUESTS information, distances, embeddings, dimensionality
+    analysis      composition, QUESTS information, distances, embeddings, dimensionality,
+                  cross-space geometry + cut overlap, label-space coverage
     export        plotting/data/<ds>/ (FPS, mean+std) plus <ds>_mean/, <ds>_kmedoids/,
                   <ds>_leverage/, ... for the other aggregation / sampler variants
 Then: cd plotting && ./make_figures.sh <ds>
@@ -27,7 +28,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from lsp import config, descriptors, selection  # noqa: E402
-from lsp.analysis import composition, dimensionality, distance, embeddings, export, quests  # noqa: E402
+from lsp.analysis import composition, crossspace, dimensionality, distance, embeddings, export, labels, quests  # noqa: E402
 
 STAGES = ["descriptors", "selection", "analysis", "export"]
 
@@ -73,6 +74,8 @@ def main():
         distance.run(a.dataset, avail)
         embeddings.run(a.dataset, avail)
         quests.run(a.dataset, methods)
+        crossspace.run(a.dataset)
+        labels.run(a.dataset, methods)
     if "export" in a.stage:
         for s in a.sampler:
             export.run(a.dataset, sampler=s)

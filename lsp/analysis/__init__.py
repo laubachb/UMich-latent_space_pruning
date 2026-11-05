@@ -5,6 +5,8 @@
     distance         category-resolved interpoint distances and FPS enrichment
     embeddings       UMAP / PCA coordinates of each latent space
     dimensionality   participation ratio of each latent space
+    crossspace       distance-rank agreement and kNN overlap between spaces; cut overlap vs retention
+    labels           label-space coverage of the cuts (W1/sigma of E/atom, |F|, stress)
     export           writes plotting/data/<dataset>/ for the gnuplot figures
 
 Each `run(dataset)` writes CSV tables to results/<dataset>/analysis/.

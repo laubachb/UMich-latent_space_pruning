@@ -32,6 +32,8 @@ STRAIN_COL = "#45A05A"
 VAC_COLS = ["#ABD1E3", "#3E86C2", "#1F4E8C", "#0B2A5C"]
 BULK_COLS = ["#D0662A", "#F0883A", "#FCA95E", "#FDC987", "#FEE5C4", "#FFF3DF"]
 POINT_TYPES = [7, 5, 9, 11, 13, 15, 3, 1]
+SHORT = {"soap": "SOAP", "behler": "BP", "bispectrum": "Bisp.", "mtp": "MTP", "chimes": "ChIMES",
+         "chimes_fingerprint": "ChIMES FP", "euler": "Euler"}
 
 
 def category_palette(names: list[str]) -> tuple[list[str], list[int]]:
@@ -78,7 +80,8 @@ def run(dataset: str, names: list[str] | None = None, variant: str = "", sampler
             f"array METHDT[NMETH] = [{gp([2] + [1] * len(names))}]",
             f"array METHPT[NMETH] = [{gp([POINT_TYPES[i % len(POINT_TYPES)] for i in range(len(methods))])}]",
             f"array DESC[NDESC] = [{gp(names)}]",
-            f"array DESCNAME[NDESC] = [{gp([descriptors.label(m) for m in names])}]"]
+            f"array DESCNAME[NDESC] = [{gp([descriptors.label(m) for m in names])}]",
+            f"array DESCSHORT[NDESC] = [{gp([SHORT.get(descriptors.split_name(m)[0], m) for m in names])}]"]
     (out / "meta.gp").write_text("\n".join(text) + "\n")
 
     # --- embeddings ------------------------------------------------------------
@@ -134,4 +137,31 @@ def run(dataset: str, names: list[str] | None = None, variant: str = "", sampler
     (out / "distance_rho.gp").write_text(
         f"# Spearman rho(mean normalized distance, FPS enrichment) per latent space\n"
         f"array RHO[{len(rho)}] = [{', '.join(f'{r:.2f}' for r in rho)}]   # {', '.join(names)}\n")
+    # --- cross-space geometry and cut overlap ---------------------------------
+    agg = "mean" if variant == "_mean" else "mean_std"
+    gf, of = A / "crossspace_geometry.csv", A / "cut_overlap.csv"
+    if gf.exists() and of.exists():
+        geo = pd.read_csv(gf)
+        geo = geo[geo.aggregation == agg].set_index(["space_a", "space_b"])
+        rows = [[i, j, geo.loc[(a, b), "rank_agreement"], geo.loc[(a, b), "knn_overlap"]]
+                for i, a in enumerate(names) for j, b in enumerate(names)]
+        write(out / "crossspace_matrix.dat", f"i j rank_agreement knn_overlap (k={int(geo.k.iloc[0])}; "
+              f"{int(geo.n_frames.iloc[0])} frames); order: " + ", ".join(names), rows, ["%d", "%d", "%.4f", "%.4f"])
+        ov = pd.read_csv(of)
+        ov = ov[(ov.aggregation == agg) & (ov.sampler == sampler)].sort_values("percent")
+        write(out / "cut_overlap.dat", "retention_pct between_mean between_min between_max same_space random  (Jaccard)",
+              ov[["percent", "between_mean", "between_min", "between_max", "same_space", "random"]].to_numpy(), "%.5f")
+        n = int(geo.n_frames.iloc[0]); k = int(geo.k.iloc[0])
+        (out / "crossspace.gp").write_text(f"KNN_RANDOM = {k / (2 * (n - 1) - k):.4f}   # Jaccard of two random {k}-sets\n")
+
+    # --- label-space coverage ------------------------------------------------
+    lf = A / "label_coverage.csv"
+    if lf.exists():
+        lab = pd.read_csv(lf)
+        cols = ["w1_energy_per_atom", "w1_force_magnitude", "w1_mean_normal_stress"]
+        for m in methods:
+            g = lab[lab.method == m].groupby("percent")[cols].agg(["mean", "std"]).fillna(0.0)
+            rows = [[p, *g.loc[p].to_numpy()] for p in g.index] + [[100, 0, 0, 0, 0, 0, 0]]
+            write(out / f"labels_{m}.dat", "retention_pct  W1/sigma_full mean sd for: energy_per_atom | "
+                  "force_magnitude | mean_normal_stress", rows, "%.6f")
     print(f"[{tag}] gnuplot data -> {out}")
