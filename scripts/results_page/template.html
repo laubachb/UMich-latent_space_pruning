@@ -128,7 +128,7 @@ figure .file { font-family: var(--font-mono); font-size: 12px; color: var(--mute
     <figure>
       <div class="head">
         <h2>Information retained (QUESTS)</h2>
-        <p>(a) Diversity D(S)/D(full), the share of distinct atomic environments a cut keeps; (b) coverage, the fraction of all atomic environments that are not novel relative to the cut; (c) entropy H(S)/H(full), how uniformly the cut is spread. Mean ± s.d. over the ten replicates, random baseline dashed.</p>
+        <p>(a) Diversity D(S)/D(full), the share of distinct atomic environments a cut keeps; (b) coverage, the fraction of all atomic environments that are not novel relative to the cut; (c) entropy H(S)/H(full), how uniformly the cut is spread. Mean ± s.d. over the replicates, random baseline dashed.</p>
       </div>
       <div class="frame"><img id="figInformation" src="" alt="QUESTS diversity, coverage and entropy of the cuts versus retention for each latent space"></div>
       <div class="file" id="fileInformation"></div>
@@ -144,7 +144,7 @@ figure .file { font-family: var(--font-mono); font-size: 12px; color: var(--mute
   </div>
 
   <div class="notes">
-    <p><b>Samplers.</b> FPS: greedy max-min (random first point), nested cuts, extreme-seeking. k-medoids: k-means with k = cut size, one medoid per cluster, density-representative. Leverage: frames drawn without replacement with probability proportional to their statistical leverage in the 90 %-variance principal subspace (randomized CUR). Same ten seeds for every sampler, space and element; 18 retentions (1–9, 10–90 %).</p>
+    <p><b>Samplers.</b> FPS: greedy max-min (random first point), nested cuts, extreme-seeking. k-medoids: k-means with k = cut size, one medoid per cluster, density-representative. Leverage: frames drawn without replacement with probability proportional to their statistical leverage in the 90 %-variance principal subspace (randomized CUR). The same seeds for every sampler, space and element; 18 retentions (1–9, 10–90 %).</p>
     <p><b>Aggregation.</b> Atom-centred descriptors are aggregated to one vector per frame by the per-atom mean, i.e. the descriptor's linear design row divided by N, which is what a linear or average-kernel model (SNAP, MTP, ChIMES, GAP) actually sees. The ChIMES A-matrix space is a per-atom mean by construction; the ChIMES fingerprint and the Euler characteristic curve (chi(r)/N of the periodic Rips filtration, 0–6 Å) are whole-frame descriptors. The earlier mean + std concatenation adds a descriptor-independent heterogeneity axis (large for any inhomogeneous cell) that inflates surface enrichment by about 25 %; it is kept in the repository as a sensitivity variant (export tags without <code>_mean</code>) but not shown here.</p>
     <p><b>Hyperparameters.</b> Each element uses the settings of the expert-optimised GAP / NNP / SNAP / MTP models of Zuo et al. (per-element cutoffs; MTP levels 16–24) and T. Sundberg's ChIMES fits for the A-matrix and fingerprint spaces. The Behler η values are the paper's Å⁻² numbers (n2p2 Bohr⁻² inputs converted). Li's ChIMES fit has no 4-body term, so its fingerprint is 2b + 3b only, and its 22 smallest cells have too few 3-body clusters and are excluded from that one space. Repository: <code>UMich-latent_space_pruning</code>, branch <code>laubachb/multi-dataset</code>, <code>results/&lt;El&gt;/</code>.</p>
   </div>
@@ -182,7 +182,7 @@ figure .file { font-family: var(--font-mono); font-size: 12px; color: var(--mute
       " % strained), Spearman ρ between a category's mean latent distance to other frames and its enrichment, and QUESTS diversity retained at 5 %.";
     document.getElementById("status").innerHTML = "";
     [["element", ds.element], ["frames", ds.n_frames], ["categories", ds.categories.length + " (" + ds.categories.join(", ") + ")"],
-     ["replicates", "10 seeds × 18 retentions"], ["run", "2026-11-05"]].forEach(function (s) {
+     ["replicates", (ds.n_replicates || 10) + " seeds × 18 retentions"], ["run", "2026-11-05"]].forEach(function (s) {
       var sp = document.createElement("span"); sp.appendChild(document.createTextNode(s[0] + " "));
       var b = document.createElement("b"); b.textContent = s[1]; sp.appendChild(b);
       document.getElementById("status").appendChild(sp);

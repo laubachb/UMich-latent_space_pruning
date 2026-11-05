@@ -28,7 +28,7 @@ heterogeneity axis that inflates FPS surface enrichment by ~25 % (4.9× vs 3.9×
 ≤ 10 % retention, averaged over Si/Ge/Li/Mo) while retaining no more information
 (QUESTS D at 5 %: 0.69 vs 0.70); the 10 % cuts of the two variants overlap by only 30–70 %.
 
-**Samplers** (applied identically in every latent space, 10 replicate seeds × 18
+**Samplers** (applied identically in every latent space, 25 replicate seeds × 18
 retentions 1–9 %, 10–90 %): `fps` farthest point sampling (extreme-seeking, nested
 cuts), `kmedoids` k-means medoids (density-representative), `leverage` randomized
 CUR by statistical leverage (subspace-spanning), and the descriptor-free `random`
@@ -75,8 +75,11 @@ cd plotting && ./make_figures.sh Cu Cu_mean Cu_kmedoids Cu_leverage
 ```
 
 On Dane: `sbatch --export=DS=Cu scripts/run_dataset.sbatch` (pdebug, 1 node; the
-QUESTS stage is the slow part, ~20–40 min per dataset; every stage is cached and
-resumable, so re-submitting continues where a job stopped). `STAGES="analysis export"`
+descriptor stage is the slow part, 10–20 min per dataset, and is cached). Selection,
+analysis and export for all cached datasets take about a minute each:
+`sbatch --export=DATASETS="Si Ge Li" scripts/rerun_analysis.sbatch`. QUESTS scores every cut
+from one precomputed (atoms × frames) kernel matrix, which is exact because cuts are sets
+of whole frames (checked against the direct evaluation by `tests/test_quests_frame_kernel.py`). `STAGES="analysis export"`
 and `EXTRA="--sampler fps"` can be exported to restrict a job.
 
 Per-cut JSON files for model fitting (one file per retention × replicate, same

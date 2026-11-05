@@ -59,7 +59,8 @@ def dataset_block(ds: str) -> dict | None:
                   and (p.name == ds or p.name.startswith(ds + "_")))
     spaces = [[n, descriptors.label(n), descriptors.COLORS.get(descriptors.split_name(n)[0], "#333")]
               for n in cfg["descriptors"] if n in descriptors.available(ds)]
-    return dict(element=cfg["element"], n_frames=len(frames), categories=cats,
+    n_rep = len(selection.load(ds, "random")["replicates"])
+    return dict(element=cfg["element"], n_frames=len(frames), n_replicates=n_rep, categories=cats,
                 full=dict(surface=round(coarse_share(full, cats, "Surface"), 1),
                           strained=round(coarse_share(full, cats, "Strained"), 1),
                           D5random=methods.get("random", [None] * 4)[3]),

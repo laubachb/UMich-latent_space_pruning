@@ -1,73 +1,73 @@
 dataset,sampler,space,label,enrich_surface,enrich_strained,enrich_vacancy,enrich_bulk,D_rel_5,cov_5,D_rel_10,cov_10,n_features,participation_ratio,rho
-Cu,random,random,Random,1.09,0.75,0.82,1.3,0.721,0.703,0.786,0.773,,,
-Cu,fps,soap,SOAP,8.61,0.75,0.27,0.79,0.667,0.663,0.857,0.73,648.0,1.82,0.75
-Cu,fps,behler,Behler–Parrinello,2.84,0.99,0.34,1.06,0.766,0.616,0.869,0.733,54.0,2.16,0.79
-Cu,fps,bispectrum,Bispectrum,5.0,0.96,0.33,0.9,0.709,0.681,0.831,0.75,110.0,1.75,0.75
-Cu,fps,mtp,MTP,8.56,0.74,0.26,0.81,0.729,0.643,0.845,0.734,576.0,1.86,0.75
-Cu,fps,chimes,ChIMES,0.49,1.17,0.15,1.16,0.776,0.621,0.88,0.735,285.0,2.57,0.68
-Cu,fps,chimes_fingerprint,ChIMES fingerprint,0.0,1.1,0.11,1.28,0.768,0.472,0.831,0.616,300.0,4.77,0.63
-Cu,fps,euler,Euler characteristic,8.4,0.92,0.1,0.69,0.723,0.512,0.784,0.671,64.0,3.35,0.93
-Cu,fps,soap_mean,SOAP (per-atom mean),6.44,0.89,0.23,0.87,0.702,0.659,0.842,0.728,324.0,2.07,0.75
-Cu,fps,behler_mean,Behler–Parrinello (per-atom mean),2.27,1.45,0.2,0.7,0.731,0.546,0.802,0.617,27.0,1.61,0.86
-Cu,fps,bispectrum_mean,Bispectrum (per-atom mean),3.62,1.16,0.28,0.83,0.702,0.667,0.829,0.75,55.0,2.01,0.71
-Cu,fps,mtp_mean,MTP (per-atom mean),8.2,0.88,0.23,0.71,0.727,0.523,0.821,0.724,288.0,2.29,0.82
-Ge,random,random,Random,0.7,1.06,0.9,1.07,0.701,0.576,0.783,0.621,,,
-Ge,fps,soap,SOAP,7.31,1.32,0.37,0.53,0.639,0.587,0.78,0.619,648.0,1.79,0.72
-Ge,fps,behler,Behler–Parrinello,2.09,1.01,1.06,0.81,0.743,0.521,0.84,0.622,54.0,2.81,0.93
-Ge,fps,bispectrum,Bispectrum,5.49,1.34,0.56,0.6,0.672,0.584,0.807,0.628,110.0,1.77,0.82
-Ge,fps,mtp,MTP,8.5,1.1,0.54,0.39,0.659,0.555,0.808,0.63,1728.0,1.69,0.62
-Ge,fps,chimes,ChIMES,2.0,1.62,0.53,0.88,0.738,0.549,0.829,0.641,471.0,2.8,0.58
-Ge,fps,chimes_fingerprint,ChIMES fingerprint,0.93,2.56,0.47,0.48,0.65,0.578,0.758,0.601,300.0,5.78,0.93
-Ge,fps,euler,Euler characteristic,6.49,1.6,0.66,0.23,0.658,0.56,0.768,0.611,64.0,2.94,0.67
-Ge,fps,soap_mean,SOAP (per-atom mean),5.49,1.5,0.48,0.56,0.653,0.588,0.796,0.622,324.0,2.05,0.72
-Ge,fps,behler_mean,Behler–Parrinello (per-atom mean),1.31,1.26,0.95,0.84,0.758,0.52,0.825,0.638,27.0,2.76,0.92
-Ge,fps,bispectrum_mean,Bispectrum (per-atom mean),3.74,1.44,0.58,0.73,0.727,0.583,0.816,0.637,55.0,2.4,0.88
-Ge,fps,mtp_mean,MTP (per-atom mean),7.39,1.26,0.57,0.41,0.663,0.563,0.807,0.626,864.0,2.0,0.68
-Li,random,random,Random,1.32,0.7,0.92,1.03,0.752,0.26,0.817,0.443,,,
-Li,fps,soap,SOAP,5.15,1.33,0.29,0.84,0.735,0.163,0.828,0.344,648.0,2.56,0.95
-Li,fps,behler,Behler–Parrinello,1.96,0.62,0.11,1.17,0.778,0.066,0.854,0.219,234.0,3.27,0.95
-Li,fps,bispectrum,Bispectrum,5.08,1.27,0.21,0.87,0.732,0.154,0.831,0.318,110.0,2.6,0.83
-Li,fps,mtp,MTP,7.16,1.01,0.12,0.79,0.733,0.088,0.828,0.333,184.0,2.3,0.95
-Li,fps,chimes,ChIMES,2.18,1.09,0.24,1.07,0.756,0.186,0.833,0.374,57.0,2.26,0.79
-Li,fps,chimes_fingerprint,ChIMES fingerprint,12.29,0.0,0.09,0.6,0.707,0.058,0.816,0.185,200.0,5.12,0.89
-Li,fps,euler,Euler characteristic,5.42,0.46,0.18,0.96,0.758,0.145,0.833,0.315,64.0,2.03,0.74
-Li,fps,soap_mean,SOAP (per-atom mean),3.93,1.08,0.36,0.94,0.742,0.22,0.83,0.359,324.0,2.56,0.9
-Li,fps,behler_mean,Behler–Parrinello (per-atom mean),1.44,0.4,0.09,1.24,0.782,0.082,0.855,0.219,117.0,2.65,0.81
-Li,fps,bispectrum_mean,Bispectrum (per-atom mean),3.85,1.08,0.18,0.98,0.749,0.163,0.827,0.341,55.0,2.62,0.88
-Li,fps,mtp_mean,MTP (per-atom mean),6.96,0.67,0.12,0.85,0.733,0.112,0.829,0.254,92.0,2.58,0.95
-Mo,random,random,Random,1.28,1.12,0.98,0.92,0.628,0.511,0.747,0.612,,,
-Mo,fps,soap,SOAP,5.38,0.72,1.21,0.74,0.671,0.531,0.817,0.594,648.0,1.94,0.68
-Mo,fps,behler,Behler–Parrinello,3.43,1.28,0.91,0.67,0.641,0.516,0.784,0.6,78.0,2.31,0.89
-Mo,fps,bispectrum,Bispectrum,4.24,1.22,1.07,0.61,0.652,0.495,0.799,0.597,60.0,1.95,0.89
-Mo,fps,mtp,MTP,6.5,0.94,1.07,0.56,0.653,0.515,0.776,0.569,576.0,1.91,0.75
-Mo,fps,chimes,ChIMES,0.08,0.95,0.59,1.18,0.746,0.478,0.848,0.565,489.0,2.99,0.82
-Mo,fps,chimes_fingerprint,ChIMES fingerprint,0.44,1.01,1.26,0.99,0.718,0.481,0.792,0.591,300.0,4.04,0.79
-Mo,fps,euler,Euler characteristic,4.7,0.88,0.89,0.77,0.677,0.503,0.766,0.586,64.0,3.22,0.96
-Mo,fps,soap_mean,SOAP (per-atom mean),4.37,0.94,0.97,0.76,0.7,0.496,0.815,0.564,324.0,2.16,0.93
-Mo,fps,behler_mean,Behler–Parrinello (per-atom mean),2.85,1.86,0.81,0.44,0.619,0.508,0.728,0.55,39.0,1.47,0.89
-Mo,fps,bispectrum_mean,Bispectrum (per-atom mean),2.92,1.38,1.03,0.64,0.657,0.506,0.783,0.557,30.0,2.28,0.96
-Mo,fps,mtp_mean,MTP (per-atom mean),5.51,1.1,1.07,0.56,0.64,0.515,0.771,0.591,288.0,2.38,0.86
-Ni,random,random,Random,1.12,0.83,0.81,1.22,0.705,0.739,0.769,0.796,,,
-Ni,fps,soap,SOAP,7.21,0.8,0.47,0.74,0.702,0.749,0.878,0.798,648.0,1.86,0.89
-Ni,fps,behler,Behler–Parrinello,2.17,1.1,0.43,0.97,0.769,0.694,0.875,0.809,54.0,2.17,0.93
-Ni,fps,bispectrum,Bispectrum,4.87,0.97,0.39,0.84,0.699,0.737,0.846,0.788,110.0,1.85,0.82
-Ni,fps,mtp,MTP,9.16,0.75,0.45,0.6,0.704,0.673,0.827,0.802,576.0,1.85,0.82
-Ni,fps,chimes,ChIMES,0.7,1.52,0.42,0.71,0.725,0.74,0.843,0.785,611.0,2.7,0.71
-Ni,fps,chimes_fingerprint,ChIMES fingerprint,0.0,1.02,0.09,1.39,0.788,0.574,0.852,0.715,300.0,4.52,0.61
-Ni,fps,euler,Euler characteristic,7.42,0.9,0.27,0.69,0.723,0.608,0.826,0.746,64.0,2.99,0.68
-Ni,fps,soap_mean,SOAP (per-atom mean),6.13,0.93,0.37,0.76,0.708,0.693,0.855,0.786,324.0,2.1,0.93
-Ni,fps,behler_mean,Behler–Parrinello (per-atom mean),1.66,1.59,0.16,0.62,0.719,0.584,0.804,0.732,27.0,1.5,0.93
-Ni,fps,bispectrum_mean,Bispectrum (per-atom mean),4.04,1.24,0.38,0.66,0.691,0.735,0.832,0.793,55.0,2.12,0.86
-Ni,fps,mtp_mean,MTP (per-atom mean),8.74,0.88,0.38,0.54,0.716,0.65,0.815,0.795,288.0,2.34,0.96
-Si,random,random,Random,0.97,0.82,0.96,1.13,0.674,0.611,0.76,0.672,,,
-Si,fps,soap,SOAP,4.76,1.12,0.76,0.58,0.665,0.605,0.775,0.675,648.0,1.82,0.93
-Si,fps,behler,Behler–Parrinello,2.31,1.1,1.41,0.51,0.705,0.579,0.818,0.655,54.0,1.74,0.87
-Si,fps,bispectrum,Bispectrum,3.49,1.24,1.06,0.48,0.669,0.613,0.799,0.68,110.0,1.85,0.75
-Si,fps,mtp,MTP,5.08,0.7,0.87,0.72,0.689,0.53,0.81,0.653,1728.0,1.69,0.93
-Si,fps,chimes,ChIMES,1.27,1.48,0.99,0.68,0.706,0.541,0.823,0.639,473.0,2.21,0.7
-Si,fps,chimes_fingerprint,ChIMES fingerprint,0.74,1.91,0.33,0.91,0.678,0.564,0.744,0.633,300.0,5.86,0.9
-Si,fps,euler,Euler characteristic,4.54,0.95,0.94,0.6,0.705,0.53,0.792,0.679,64.0,3.45,0.83
-Si,fps,soap_mean,SOAP (per-atom mean),3.44,1.26,0.75,0.68,0.677,0.62,0.804,0.686,324.0,1.85,0.78
-Si,fps,behler_mean,Behler–Parrinello (per-atom mean),1.53,1.41,1.42,0.41,0.715,0.489,0.802,0.639,27.0,1.78,0.83
-Si,fps,bispectrum_mean,Bispectrum (per-atom mean),2.17,1.28,1.25,0.52,0.691,0.596,0.81,0.674,55.0,2.57,0.85
-Si,fps,mtp_mean,MTP (per-atom mean),4.94,0.82,0.99,0.59,0.701,0.503,0.815,0.666,864.0,1.98,0.82
+Cu,random,random,Random,1.06,0.9,0.95,1.11,0.706,0.69,0.778,0.77,,,
+Cu,fps,soap,SOAP,8.7,0.73,0.33,0.78,0.669,0.66,0.858,0.734,648.0,1.82,0.75
+Cu,fps,behler,Behler–Parrinello,2.76,0.99,0.38,1.05,0.763,0.596,0.87,0.733,54.0,2.16,0.75
+Cu,fps,bispectrum,Bispectrum,4.92,0.95,0.4,0.88,0.711,0.683,0.832,0.748,110.0,1.75,0.75
+Cu,fps,mtp,MTP,8.58,0.73,0.33,0.79,0.729,0.642,0.843,0.734,576.0,1.86,0.75
+Cu,fps,chimes,ChIMES,0.3,1.17,0.29,1.13,0.775,0.634,0.879,0.738,285.0,2.57,0.43
+Cu,fps,chimes_fingerprint,ChIMES fingerprint,0.0,1.1,0.19,1.26,0.768,0.479,0.834,0.614,300.0,4.77,0.54
+Cu,fps,euler,Euler characteristic,8.32,0.91,0.19,0.68,0.723,0.512,0.784,0.67,64.0,3.35,0.93
+Cu,fps,soap_mean,SOAP (per-atom mean),6.47,0.88,0.31,0.84,0.702,0.665,0.84,0.727,324.0,2.07,0.75
+Cu,fps,behler_mean,Behler–Parrinello (per-atom mean),2.16,1.44,0.23,0.71,0.732,0.541,0.801,0.624,27.0,1.61,0.86
+Cu,fps,bispectrum_mean,Bispectrum (per-atom mean),3.5,1.18,0.35,0.8,0.7,0.669,0.83,0.75,55.0,2.01,0.82
+Cu,fps,mtp_mean,MTP (per-atom mean),8.15,0.88,0.3,0.69,0.728,0.519,0.821,0.725,288.0,2.29,0.93
+Ge,random,random,Random,1.14,0.98,1.02,0.98,0.703,0.57,0.792,0.617,,,
+Ge,fps,soap,SOAP,7.34,1.27,0.41,0.53,0.646,0.587,0.781,0.618,648.0,1.79,0.72
+Ge,fps,behler,Behler–Parrinello,2.09,0.92,1.07,0.86,0.742,0.531,0.84,0.628,54.0,2.81,0.95
+Ge,fps,bispectrum,Bispectrum,5.43,1.24,0.61,0.63,0.677,0.585,0.808,0.628,110.0,1.77,0.83
+Ge,fps,mtp,MTP,8.51,0.99,0.63,0.38,0.663,0.564,0.808,0.629,1728.0,1.69,0.65
+Ge,fps,chimes,ChIMES,2.04,1.47,0.58,0.92,0.744,0.557,0.828,0.641,471.0,2.8,0.58
+Ge,fps,chimes_fingerprint,ChIMES fingerprint,0.73,2.36,0.52,0.59,0.675,0.582,0.761,0.604,300.0,5.78,0.88
+Ge,fps,euler,Euler characteristic,6.57,1.47,0.69,0.28,0.661,0.565,0.768,0.611,64.0,2.94,0.77
+Ge,fps,soap_mean,SOAP (per-atom mean),5.47,1.41,0.53,0.58,0.661,0.589,0.793,0.621,324.0,2.05,0.82
+Ge,fps,behler_mean,Behler–Parrinello (per-atom mean),1.22,1.18,0.99,0.87,0.752,0.527,0.825,0.637,27.0,2.76,0.93
+Ge,fps,bispectrum_mean,Bispectrum (per-atom mean),3.74,1.37,0.65,0.72,0.725,0.568,0.815,0.636,55.0,2.4,0.95
+Ge,fps,mtp_mean,MTP (per-atom mean),7.33,1.15,0.64,0.43,0.671,0.565,0.809,0.628,864.0,2.0,0.68
+Li,random,random,Random,0.68,0.85,1.08,1.02,0.748,0.276,0.812,0.459,,,
+Li,fps,soap,SOAP,5.14,1.36,0.42,0.81,0.732,0.171,0.828,0.351,648.0,2.56,0.95
+Li,fps,behler,Behler–Parrinello,1.86,0.44,0.27,1.17,0.779,0.072,0.854,0.21,234.0,3.27,0.79
+Li,fps,bispectrum,Bispectrum,5.08,1.24,0.34,0.85,0.733,0.153,0.83,0.321,110.0,2.6,0.86
+Li,fps,mtp,MTP,7.35,0.75,0.28,0.78,0.732,0.089,0.828,0.325,184.0,2.3,0.95
+Li,fps,chimes,ChIMES,1.82,1.08,0.36,1.07,0.757,0.183,0.833,0.373,57.0,2.26,0.79
+Li,fps,chimes_fingerprint,ChIMES fingerprint,12.03,0.0,0.26,0.58,0.711,0.065,0.817,0.18,200.0,5.12,0.68
+Li,fps,euler,Euler characteristic,5.51,0.3,0.29,0.95,0.76,0.139,0.833,0.312,64.0,2.03,0.69
+Li,fps,soap_mean,SOAP (per-atom mean),4.01,1.07,0.46,0.91,0.743,0.209,0.831,0.354,324.0,2.56,0.9
+Li,fps,behler_mean,Behler–Parrinello (per-atom mean),1.18,0.26,0.26,1.24,0.783,0.084,0.855,0.218,117.0,2.65,0.67
+Li,fps,bispectrum_mean,Bispectrum (per-atom mean),3.85,0.88,0.31,0.98,0.749,0.165,0.828,0.328,55.0,2.62,0.79
+Li,fps,mtp_mean,MTP (per-atom mean),6.92,0.48,0.27,0.84,0.736,0.109,0.83,0.251,92.0,2.58,0.83
+Mo,random,random,Random,1.51,1.0,1.02,0.95,0.646,0.52,0.751,0.61,,,
+Mo,fps,soap,SOAP,5.58,0.7,1.09,0.76,0.67,0.524,0.816,0.587,648.0,1.94,0.75
+Mo,fps,behler,Behler–Parrinello,3.54,1.28,0.8,0.68,0.645,0.516,0.784,0.601,78.0,2.31,0.89
+Mo,fps,bispectrum,Bispectrum,4.4,1.18,1.02,0.62,0.653,0.496,0.8,0.599,60.0,1.95,0.89
+Mo,fps,mtp,MTP,6.66,0.92,0.96,0.58,0.657,0.507,0.774,0.565,576.0,1.91,0.89
+Mo,fps,chimes,ChIMES,0.44,0.9,0.47,1.2,0.746,0.46,0.848,0.552,489.0,2.99,0.68
+Mo,fps,chimes_fingerprint,ChIMES fingerprint,0.54,0.95,1.14,1.04,0.727,0.468,0.793,0.591,300.0,4.04,0.86
+Mo,fps,euler,Euler characteristic,4.82,0.87,0.82,0.79,0.677,0.499,0.766,0.587,64.0,3.22,0.96
+Mo,fps,soap_mean,SOAP (per-atom mean),4.5,0.94,0.87,0.76,0.7,0.497,0.814,0.562,324.0,2.16,0.93
+Mo,fps,behler_mean,Behler–Parrinello (per-atom mean),3.2,1.78,0.68,0.47,0.624,0.51,0.731,0.557,39.0,1.47,0.86
+Mo,fps,bispectrum_mean,Bispectrum (per-atom mean),3.2,1.36,0.92,0.64,0.658,0.496,0.784,0.557,30.0,2.28,0.89
+Mo,fps,mtp_mean,MTP (per-atom mean),5.75,1.08,0.92,0.58,0.645,0.51,0.766,0.585,288.0,2.38,0.96
+Ni,random,random,Random,0.78,0.95,0.98,1.08,0.682,0.742,0.769,0.81,,,
+Ni,fps,soap,SOAP,7.27,0.77,0.45,0.78,0.707,0.746,0.878,0.795,648.0,1.86,0.89
+Ni,fps,behler,Behler–Parrinello,2.12,1.08,0.44,1.0,0.77,0.694,0.875,0.801,54.0,2.17,0.93
+Ni,fps,bispectrum,Bispectrum,4.79,0.95,0.43,0.85,0.697,0.733,0.847,0.784,110.0,1.85,0.82
+Ni,fps,mtp,MTP,9.11,0.72,0.46,0.63,0.718,0.67,0.826,0.8,576.0,1.85,0.82
+Ni,fps,chimes,ChIMES,0.43,1.51,0.38,0.76,0.73,0.736,0.842,0.789,611.0,2.7,0.61
+Ni,fps,chimes_fingerprint,ChIMES fingerprint,0.0,1.01,0.19,1.37,0.789,0.581,0.852,0.716,300.0,4.52,0.39
+Ni,fps,euler,Euler characteristic,7.42,0.86,0.28,0.73,0.723,0.631,0.827,0.746,64.0,2.99,0.68
+Ni,fps,soap_mean,SOAP (per-atom mean),6.14,0.91,0.32,0.79,0.72,0.698,0.854,0.781,324.0,2.1,0.96
+Ni,fps,behler_mean,Behler–Parrinello (per-atom mean),1.7,1.54,0.25,0.64,0.719,0.611,0.802,0.748,27.0,1.5,0.75
+Ni,fps,bispectrum_mean,Bispectrum (per-atom mean),3.98,1.22,0.36,0.69,0.692,0.737,0.833,0.796,55.0,2.12,0.79
+Ni,fps,mtp_mean,MTP (per-atom mean),8.58,0.84,0.39,0.59,0.722,0.655,0.817,0.795,288.0,2.34,0.96
+Si,random,random,Random,0.86,0.97,1.03,1.02,0.662,0.606,0.747,0.673,,,
+Si,fps,soap,SOAP,4.68,1.14,0.76,0.57,0.66,0.611,0.775,0.678,648.0,1.82,0.92
+Si,fps,behler,Behler–Parrinello,2.15,1.1,1.35,0.56,0.706,0.565,0.817,0.65,54.0,1.74,0.8
+Si,fps,bispectrum,Bispectrum,3.44,1.24,1.05,0.5,0.667,0.612,0.798,0.679,110.0,1.85,0.71
+Si,fps,mtp,MTP,5.01,0.68,0.86,0.75,0.688,0.531,0.809,0.658,1728.0,1.69,0.88
+Si,fps,chimes,ChIMES,1.07,1.45,1.02,0.7,0.706,0.562,0.824,0.657,473.0,2.21,0.52
+Si,fps,chimes_fingerprint,ChIMES fingerprint,0.66,1.9,0.32,0.93,0.677,0.566,0.741,0.636,300.0,5.86,0.84
+Si,fps,euler,Euler characteristic,4.64,0.89,0.96,0.61,0.704,0.538,0.792,0.679,64.0,3.45,0.81
+Si,fps,soap_mean,SOAP (per-atom mean),3.44,1.24,0.76,0.68,0.679,0.62,0.801,0.686,324.0,1.85,0.73
+Si,fps,behler_mean,Behler–Parrinello (per-atom mean),1.32,1.41,1.42,0.44,0.713,0.498,0.803,0.632,27.0,1.78,0.84
+Si,fps,bispectrum_mean,Bispectrum (per-atom mean),2.14,1.24,1.27,0.53,0.694,0.595,0.81,0.673,55.0,2.57,0.86
+Si,fps,mtp_mean,MTP (per-atom mean),4.95,0.79,1.0,0.6,0.696,0.519,0.813,0.665,864.0,1.98,0.74

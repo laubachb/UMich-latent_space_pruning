@@ -1,2 +1,2 @@
 # Spearman rho(mean normalized distance, FPS enrichment) per latent space
-array RHO[7] = [0.58, 0.68, 0.75, 0.98, 0.92, 0.90, 0.87]   # soap, behler, bispectrum, mtp, chimes, chimes_fingerprint, euler
+array RHO[7] = [0.70, 0.78, 0.78, 0.88, 0.93, 0.97, 0.95]   # soap, behler, bispectrum, mtp, chimes, chimes_fingerprint, euler

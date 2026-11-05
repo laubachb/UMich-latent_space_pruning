@@ -83,7 +83,7 @@ def readme(datasets, percents, n_rep):
         f"Retention levels: {', '.join(str(p) + ' %' for p in percents)} of the full training set "
         "(subset size = floor(retention x n_frames), at least 1).",
         f"Replicates: {n_rep} per (element, sampler, latent space, retention); replicate r uses seed r of one fixed "
-        "seed sequence (random.seed(42)) everywhere, and replicates 1-10 are exactly the cuts analysed in the study's figures.", "",
+        f"seed sequence (random.seed(42)) everywhere, and replicates 1-{selection.N_REPLICATES} are exactly the cuts analysed in the study's figures.", "",
         "## File names", "",
         "    <El>/<sampler>/<space>/<El>_trainsubset_<sampler>_<space>_retain<PPP>pct_<NNN>frames_rep<RRR>.json", "",
         "    <El>      element (Si, Cu, Ge, Li, Mo, Ni)",

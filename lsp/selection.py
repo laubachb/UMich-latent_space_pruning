@@ -1,7 +1,7 @@
 """Training-set selection in every latent space, with several subsampling rules.
 
 Samplers (all operate on the z-scored descriptor matrix of one latent space and
-use the same ten replicate seeds everywhere):
+use the same replicate seeds everywhere):
 
     fps        farthest point sampling (skmatter, random first point). Greedy
                max-min: each pick is the frame farthest from the current set, so
@@ -21,7 +21,7 @@ A selection is identified as "<sampler>-<latent space>" ("random" for the
 baseline) and stored in results/<dataset>/selection/<id>.json: FPS keeps the ten
 rankings, the others store the frame indices of every (retention, replicate) cut.
 
-Seeds: random.seed(42) -> ten replicate seeds (identical for every sampler, latent
+Seeds: random.seed(42) -> N_REPLICATES replicate seeds (identical for every sampler, latent
 space and dataset, as in the original Si scripts). Frames whose descriptor is
 undefined (NaN rows) are excluded from that latent space's pool and recorded.
 """
@@ -37,7 +37,7 @@ import numpy as np
 from . import data, descriptors, paths
 
 PERCENTS = list(range(1, 10)) + list(range(10, 100, 10))     # 1..9, 10..90
-N_REPLICATES = 10
+N_REPLICATES = 25
 SEED = 42
 SAMPLERS = ["fps", "kmedoids", "leverage"]
 DEFAULT_SAMPLER = "fps"

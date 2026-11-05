@@ -8,7 +8,7 @@
 
 Stages
     descriptors   every latent space in configs/<ds>.json plus the per-atom-mean variants
-    selection     every sampler (fps, kmedoids, leverage; 10 replicates) in every latent
+    selection     every sampler (fps, kmedoids, leverage; 25 replicates) in every latent
                   space + the random baseline
     analysis      composition, QUESTS information, distances, embeddings, dimensionality
     export        plotting/data/<ds>/ (FPS, mean+std) plus <ds>_mean/, <ds>_kmedoids/,

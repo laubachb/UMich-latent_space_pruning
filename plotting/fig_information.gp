@@ -1,6 +1,6 @@
 # QUESTS information content of the pruned training sets vs retention, three panels:
 # (a) diversity D(S)/D(full), (b) coverage of the full dataset, (c) entropy H(S)/H(full);
-# mean ± s.d. over the 10 replicates; legend strip underneath.
+# mean ± s.d. over the replicates; legend strip underneath.
 # Data: data/<DS>/information_<method>.dat   Output: ../figures/<DS>/fig_dataset_information.png
 
 reset

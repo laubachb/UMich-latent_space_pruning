@@ -1,7 +1,7 @@
 # Category composition of the pruned training sets vs retention, one panel per
 # selection method (random baseline first) on a grid of 4 columns. The legend takes
 # the free cell after the last panel; when the grid is full it goes in a two-row
-# strip under the panels instead. Pooled over the 10 replicates.
+# strip under the panels instead. Pooled over the replicates.
 # Data: data/<DS>/composition_<method>.dat   Output: ../figures/<DS>/fig_dataset_composition.png
 
 reset
