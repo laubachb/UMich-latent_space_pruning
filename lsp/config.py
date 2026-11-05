@@ -15,7 +15,7 @@ from pathlib import Path
 from . import paths
 
 # Descriptors in the order they appear in figures/tables.
-DESCRIPTOR_ORDER = ["soap", "behler", "bispectrum", "mtp", "chimes", "chimes_fingerprint"]
+DESCRIPTOR_ORDER = ["soap", "behler", "bispectrum", "mtp", "chimes", "chimes_fingerprint", "euler"]
 
 
 def available_datasets() -> list[str]:

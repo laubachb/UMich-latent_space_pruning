@@ -9,7 +9,8 @@
   "soap",
   "behler",
   "bispectrum",
-  "chimes"
+  "chimes",
+  "euler"
  ],
  "soap": {
   "r_cut": 5.0,
@@ -52,5 +53,9 @@
  "chimes": {
   "descriptor": "energy_row_per_atom",
   "npz": "legacy_si/chimes/chimes_raw.npz"
+ },
+ "euler": {
+  "r_max": 6.0,
+  "n_bins": 64
  }
 }

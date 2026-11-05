@@ -13,6 +13,7 @@ Latent spaces
     mtp                 MTP basis functions, mean + std over atoms           (numpy)
     chimes              ChIMES A-matrix energy row / natoms (per-atom mean)  (A.txt)
     chimes_fingerprint  full-frame ChIMES cluster-graph fingerprint, alpha=1 (LAMMPS + tool)
+    euler               Euler characteristic curve of the periodic Rips filtration (numpy)
     <name>_mean         per-atom MEAN only of an atom-centred descriptor (= its linear
                         design row / natoms, the aggregation a linear or average-kernel
                         model actually sees; the analogue of `chimes`) — from the cache
@@ -39,6 +40,7 @@ LABELS = {
     "mtp": "MTP",
     "chimes": "ChIMES",
     "chimes_fingerprint": "ChIMES fingerprint",
+    "euler": "Euler characteristic",
 }
 
 COLORS = {
@@ -49,6 +51,7 @@ COLORS = {
     "mtp": "#8338EC",
     "chimes": "#E63946",
     "chimes_fingerprint": "#A4161A",
+    "euler": "#7F7F00",
 }
 
 
@@ -138,6 +141,9 @@ def compute(dataset: str, name: str, force: bool = False) -> np.ndarray:
         from . import chimes_fingerprint
         X = chimes_fingerprint.structure_descriptors(frames, config.descriptor_params(cfg, name),
                                                      cfg["element"], cfg["chimes_dir"])
+    elif name == "euler":
+        from . import euler
+        X = euler.structure_descriptors(frames, config.descriptor_params(cfg, name))
     else:
         raise KeyError(f"unknown descriptor '{name}'")
     if X.shape[0] != len(frames):

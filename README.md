@@ -17,6 +17,7 @@ hyperparameters of that paper's expert-optimised models.
 | `mtp` | moment-tensor basis functions (level 16–24, MLIP-2 contraction tables) | MTP | mean + std over atoms |
 | `chimes` | ChIMES A-matrix energy row / N (per-atom cluster-polynomial sums) | ChIMES | per-atom mean (= design row / N) |
 | `chimes_fingerprint` | full-frame ChIMES cluster-graph fingerprint, α = 1 (Laubach et al.) | ChIMES | 3 × 100-bin histograms, no atomic averaging |
+| `euler` | Euler characteristic curve of the periodic Rips filtration (0–6 Å, 64 radii) | — (topological reference) | chi(r)/N, no atomic averaging |
 | `<id>_mean` | per-atom **mean** only of any atom-centred descriptor above | | design row / N, the aggregation a linear / average-kernel model sees |
 
 **Samplers** (applied identically in every latent space, 10 replicate seeds × 18

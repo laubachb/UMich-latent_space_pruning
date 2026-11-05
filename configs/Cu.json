@@ -12,7 +12,8 @@
   "bispectrum",
   "mtp",
   "chimes",
-  "chimes_fingerprint"
+  "chimes_fingerprint",
+  "euler"
  ],
  "soap": {
   "r_cut": 4.1,
@@ -63,5 +64,9 @@
   "alpha": 1.0,
   "params_file": "params.txt",
   "bins": 100
+ },
+ "euler": {
+  "r_max": 6.0,
+  "n_bins": 64
  }
 }
