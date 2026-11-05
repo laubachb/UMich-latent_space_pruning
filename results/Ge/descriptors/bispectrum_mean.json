@@ -1,0 +1,11 @@
+{
+ "dataset": "Ge",
+ "descriptor": "bispectrum_mean",
+ "shape": [
+  228,
+  55
+ ],
+ "seconds": 0.0,
+ "params": {},
+ "n_nan_rows": 0
+}

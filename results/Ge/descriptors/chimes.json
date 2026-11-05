@@ -1,0 +1,13 @@
+{
+ "dataset": "Ge",
+ "descriptor": "chimes",
+ "shape": [
+  228,
+  471
+ ],
+ "seconds": 0.5,
+ "params": {
+  "descriptor": "energy_row_per_atom"
+ },
+ "n_nan_rows": 0
+}

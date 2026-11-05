@@ -1,0 +1,11 @@
+{
+ "dataset": "Ge",
+ "descriptor": "behler_mean",
+ "shape": [
+  228,
+  27
+ ],
+ "seconds": 0.0,
+ "params": {},
+ "n_nan_rows": 0
+}

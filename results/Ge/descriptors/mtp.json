@@ -1,0 +1,14 @@
+{
+ "dataset": "Ge",
+ "descriptor": "mtp",
+ "shape": [
+  228,
+  1728
+ ],
+ "seconds": 14.0,
+ "params": {
+  "level": 24,
+  "cutoff": 5.1
+ },
+ "n_nan_rows": 0
+}

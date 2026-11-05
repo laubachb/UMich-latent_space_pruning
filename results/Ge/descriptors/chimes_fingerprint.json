@@ -1,0 +1,15 @@
+{
+ "dataset": "Ge",
+ "descriptor": "chimes_fingerprint",
+ "shape": [
+  228,
+  300
+ ],
+ "seconds": 283.6,
+ "params": {
+  "alpha": 1.0,
+  "params_file": "params.txt",
+  "bins": 100
+ },
+ "n_nan_rows": 0
+}

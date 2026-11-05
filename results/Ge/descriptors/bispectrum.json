@@ -1,0 +1,16 @@
+{
+ "dataset": "Ge",
+ "descriptor": "bispectrum",
+ "shape": [
+  228,
+  110
+ ],
+ "seconds": 132.6,
+ "params": {
+  "rcutfac": 5.5,
+  "twojmax": 8,
+  "r": 0.5,
+  "w": 1
+ },
+ "n_nan_rows": 0
+}

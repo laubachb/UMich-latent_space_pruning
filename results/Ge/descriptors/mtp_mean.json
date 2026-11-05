@@ -1,0 +1,11 @@
+{
+ "dataset": "Ge",
+ "descriptor": "mtp_mean",
+ "shape": [
+  228,
+  864
+ ],
+ "seconds": 0.5,
+ "params": {},
+ "n_nan_rows": 0
+}
