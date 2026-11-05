@@ -1,0 +1,18 @@
+# UMAP analysis — local-only paths
+#
+# Layout (see README.md):
+#   unsupervised/     baseline study
+#   descriptor_cache/ regenerable structure_descriptors.npz (+ README)
+#   .venv/            local Python env
+
+.venv/
+.micromamba/
+.conda-pkgs/
+.cache/
+descriptor_cache/*.npz
+__pycache__/
+*.pyc
+.DS_Store
+
+# Legacy / ad-hoc caches under unsupervised/data (prefer descriptor_cache/)
+unsupervised/data/*.npz

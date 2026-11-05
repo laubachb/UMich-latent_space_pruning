@@ -20,8 +20,8 @@ hyperparameters of that paper's expert-optimised models.
 | `euler` | Euler characteristic curve of the periodic Rips filtration (0–6 Å, 64 radii) | — (topological reference) | chi(r)/N, no atomic averaging |
 | `<id>_mean` | per-atom **mean** only of any atom-centred descriptor above | | design row / N, the aggregation a linear / average-kernel model sees |
 
-**Paper convention (decided 2026-11-05): the atom-centred spaces enter the paper as
-their per-atom mean** (`soap_mean`, `behler_mean`, `bispectrum_mean`, `mtp_mean`;
+**Convention used in the manuscript: the atom-centred spaces enter as their
+per-atom mean** (`soap_mean`, `behler_mean`, `bispectrum_mean`, `mtp_mean`;
 export tags `<ds>_mean[_<sampler>]`). The mean + std concatenation of the original
 Si study is kept as a sensitivity variant: its std block adds a descriptor-independent
 heterogeneity axis that inflates FPS surface enrichment by ~25 % (4.9× vs 3.9× at
@@ -51,16 +51,24 @@ against the full set: `fig_label_coverage`).
 lsp/                      the package
   config.py data.py paths.py selection.py
   descriptors/            one module per latent space + registry/caching (__init__.py)
-  analysis/               composition, quests, distance, embeddings, dimensionality, export
+  analysis/               composition, quests, distance, embeddings, dimensionality,
+                          crossspace, labels, export
   mtp_levels/             MLIP-2 untrained MTP definitions (contraction tables), BSD-2
 configs/<ds>.json         per-dataset hyperparameters (Si, Cu, Ge, Li, Mo, Ni, si_legacy)
 configs/local_paths.json  machine-specific executables (gitignored; see .example)
-scripts/                  run_pipeline.py, run_dataset.sbatch, fetch_mlearn_data.py, export_cuts.py
+scripts/                  run_pipeline.py (+ run_dataset.sbatch, rerun_analysis.sbatch),
+                          fetch_mlearn_data.py, summarize.py, export_cuts.py,
+                          export_training_subsets.py (+ export_subsets.sbatch), verify_subsets_archive.py,
+                          build_results_page.py / artifact_data.py (results web page)
 plotting/                 gnuplot figure scripts (parametric in the dataset) + make_figures.sh
-tests/                    test_legacy_si.py (exact reproduction of the original Si study)
+tests/                    test_legacy_si.py (exact reproduction of the original Si study),
+                          test_quests_frame_kernel.py (fast QUESTS scoring vs direct evaluation)
 models/                   notes for the downstream potential fits
+analysis/                 unsupervised UMAP study of the original Si pipeline (see below)
 external/                 UNTRACKED inputs: mlearn/<El>/training.json, chimes/<El>/{A.txt,...}
-results/<ds>/             descriptors/ (npy caches, ignored) selection/ (tracked) analysis/ (small csv tracked)
+results/<ds>/             descriptors/ (npy caches, ignored), selection/ (tracked),
+                          selection_export/ (tracked), analysis/ (small csv tracked)
+results/summary/          cross-element summary tables per sampler (tracked)
 plotting/data/<tag>/      exported .dat files per (dataset, aggregation, sampler) — tracked
 figures/<tag>/fig_*.png   publication figures — tracked
 ```
@@ -140,13 +148,36 @@ cold→hot, bulk hot→cold, Strained.
 
 ## Outputs per dataset
 
-* `results/<ds>/selection/<sampler>-<space>.json`, `random.json` — the selections
-  (FPS: ten rankings; others: explicit cuts). Tracked.
-* `results/<ds>/analysis/composition.csv`, `dimensionality.csv`, `distance_selection.csv`
-  (tracked); `quests.csv`, `distance_histograms.csv`, `embeddings.csv` (regenerable).
+* `results/<ds>/selection/<sampler>-<space>.json`, `random.json` — the selections behind
+  the figures, 25 replicates × 18 retentions (FPS: 25 rankings, cuts are their prefixes;
+  others: explicit cuts). Tracked.
+* `results/<ds>/selection_export/` — the selections behind the training-subset archive,
+  100 replicates × 7 retentions (1, 2, 5, 10, 25, 50, 75 %), per-atom-mean and structure-level
+  spaces only. The same seed sequence is used everywhere, so replicate r is the same cut in
+  both sets. Tracked; `scripts/export_training_subsets.py` turns them into a tar of
+  ready-to-fit JSON files (with a README and manifest inside), `scripts/verify_subsets_archive.py`
+  checks it.
+* `results/<ds>/analysis/composition.csv`, `dimensionality.csv`, `distance_selection.csv`,
+  `crossspace_geometry.csv`, `cut_overlap.csv` (tracked); `quests.csv`, `label_coverage.csv`,
+  `distance_histograms.csv`, `embeddings.csv` (per cut / per frame, regenerable).
+* `results/summary/<sampler>_summary.{csv,md}` — enrichment, ρ and QUESTS metrics per element
+  and latent space at low retention.
 * `plotting/data/<ds>[_mean][_<sampler>]/*.dat` + `meta.gp`; `figures/<same tag>/fig_*.png`:
   `fig_umap_latent_spaces`, `fig_dataset_composition`, `fig_dataset_information`,
-  `fig_distance_analysis`.
+  `fig_distance_analysis`, `fig_crossspace`, `fig_label_coverage`.
+
+## Unsupervised UMAP study (`analysis/umap/`)
+
+A separate visualization study contributed by @Yanjun-Lyu (pull request #18): UMAP
+embeddings of the Si latent spaces coloured by structure category, phase and energy,
+with shared labelling rules in `analysis/categorization.py`. Its own READMEs
+(`analysis/umap/README.md`, `analysis/umap/unsupervised/README.md`) describe how to run it;
+it reads `data.json` (the Si `training.json`) from the repository root. It builds its
+descriptors with the original Si pipeline's definitions — mean + std aggregation, the
+bispectrum fitting rows (`pot_fit=True`) and the ChIMES frame pickle of the original
+`descriptors/chimes/` scripts, which are in the git history at commit `5075c14` — not
+with the corrected per-element definitions in `lsp/` used for the manuscript figures
+(`figures/<El>_mean*/fig_umap_latent_spaces.png`).
 
 ## Provenance of the Si study
 
