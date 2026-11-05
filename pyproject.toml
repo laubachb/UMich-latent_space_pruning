@@ -1,7 +1,7 @@
 [project]
 name = "umich-latent-space-pruning"
 version = "0.1.0"
-description = "Descriptor-induced sampling bias in MLIPs: descriptor FPS pruning, latent-space information, and physics-encoding analysis for Si datasets."
+description = "Descriptor-induced sampling bias in MLIPs: latent spaces of SOAP / Behler-Parrinello / bispectrum / MTP / ChIMES descriptors, subsampling (FPS, k-medoids, leverage) and information analyses on the Zuo et al. 2020 benchmark datasets."
 readme = "README.md"
 requires-python = ">=3.12,<3.14"
 

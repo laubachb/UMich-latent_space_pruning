@@ -1,36 +1,38 @@
-# ── Raw ChIMES descriptor inputs (large; generated externally) ─────────────────
-# Never commit A matrices, wherever they live
-descriptors/chimes/natoms.txt
+# ── Data that is never committed ──────────────────────────────────────────────
+# mlearn benchmark frames (public; fetched by scripts/fetch_mlearn_data.py)
+external/mlearn/
+# ChIMES fits of T. Sundberg (A matrices, b vectors, training trajectories, params)
+external/chimes/
+# any ChIMES A matrix, wherever it lives
 A.txt
 *_A.txt
 A_*.txt
+# outputs of the original Si study kept for provenance (per-descriptor scripts, cuts, caches)
+legacy_si/
+# the Si study's data.json (identical to external/mlearn/Si/training.json)
+data.json
+# manuscript drafts
+writing/
 
-# ── Generated outputs (descriptor + FPS pruning runs) ─────────────────────────
-descriptors/*/replicates_structure_pruning_modified/
-descriptors/*/replicates_structure_pruning/
-descriptors/*/structure_level_pruned/
-descriptors/behler/random_replicates_structure_pruning/
-random_replicates_structure_pruning/
+# ── Results: large / regenerable files are ignored, small tables are tracked ────
+results/*/descriptors/*.npy
+results/*/descriptors/*.npz
+results/*/logs/
+results/slurm_*.log
+results/*/analysis/distance_histograms.csv
+results/*/analysis/embeddings.csv
+results/*/analysis/quests.csv
+# tracked: results/<ds>/selection/*.json (selections), results/<ds>/analysis/{composition,
+# dimensionality,distance_selection}.csv, results/<ds>/descriptors/*.json (provenance)
 
-# ── Intermediate descriptor files ─────────────────────────────────────────────
-descriptors/chimes/frames_descriptors.pkl
-descriptors/chimes/chimes_raw.npz
-*.log
+# ── Figures: only the gnuplot publication figures are tracked ──────────────────
+figures/*
+!figures/*/
+figures/*/*
+!figures/*/fig_*.png
 
-# Cached raw (pre-standardization) structure-descriptor matrices written by each
-# descriptors/*/compute_and_prune.py so the expensive descriptor evaluation runs
-# only once. Regenerable; delete a .npy to force that descriptor to recompute.
-descriptors/*/structure_descriptors_*.npy
-
-# Scratch dirs left by maml/LAMMPS static calculators
-descriptors/*/tmp*/
-
-# ── Clustering descriptor cache (regenerable via clustering/compute_descriptor_matrices.py) ──
-# Large per-frame descriptor matrices are cached locally but not committed (they
-# require dscribe / maml+LAMMPS / ChIMES to regenerate). The small result CSVs in
-# clustering/cache/ (metadata, metrics, entropy, distance stats) ARE tracked.
-clustering/cache/*.npy
-clustering/cache/*.csv
+# ── Machine-specific tool paths ───────────────────────────────────────────────
+configs/local_paths.json
 
 # ── Python ────────────────────────────────────────────────────────────────────
 .venv/
@@ -38,23 +40,12 @@ __pycache__/
 *.pyc
 *.pyo
 .ipynb_checkpoints/
-
-# ── macOS ─────────────────────────────────────────────────────────────────────
-.DS_Store
-
-# ── Editor / tooling ──────────────────────────────────────────────────────────
-.claude/
 *.egg-info/
 dist/
 build/
 .env
 
-writing/
-random_for_ben/
-figures/*.png
-# gnuplot publication figures (plotting/) are tracked
-!figures/fig_*.png
-
-# Superseded bispectrum (pot_fit=True) FPS cuts + caches, kept for provenance
-descriptors/*/archive_*.tar.gz
-descriptors/*/*_fps_replicates_*.tar.gz
+# ── Editor / OS ───────────────────────────────────────────────────────────────
+.claude/
+.DS_Store
+*.log

@@ -1,0 +1,5 @@
+{
+ "lmp_serial": "/path/to/lmp_serial",
+ "lmp_chimes_fp": "/path/to/lmp_mpi_chimes_fp",
+ "chimes_fingerprint_tool": "/path/to/fingerprint_all_alphas"
+}

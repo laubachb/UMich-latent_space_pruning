@@ -1,0 +1,56 @@
+{
+ "element": "Si",
+ "n_frames": 214,
+ "source": "data.json of the original Si study (= mlearn data/Si/training.json)",
+ "frames": "external/mlearn/Si/training.json",
+ "chimes_fit": "original 1101-parameter Si ChIMES A matrix (descriptors/chimes/A.txt of the Si study)",
+ "note": "Reproduces the latent spaces of the original Si study exactly (tests/test_legacy_si.py). SOAP 5.0/9/9/sigma 1.0 and behler etas 0.01/0.02/0.05 \u00c5^-2 differ from the Zuo et al. model settings used in Si.json.",
+ "descriptors": [
+  "soap",
+  "behler",
+  "bispectrum",
+  "chimes"
+ ],
+ "soap": {
+  "r_cut": 5.0,
+  "n_max": 9,
+  "l_max": 9,
+  "sigma": 1.0
+ },
+ "behler": {
+  "cutoff": 5.5,
+  "r_etas": [
+   0.01,
+   0.02,
+   0.05
+  ],
+  "r_shift": [
+   4.0
+  ],
+  "a_etas": [
+   0.01,
+   0.02,
+   0.05
+  ],
+  "zetas": [
+   1.0,
+   16.0,
+   2.0,
+   4.0
+  ],
+  "lambdas": [
+   1,
+   -1
+  ]
+ },
+ "bispectrum": {
+  "rcutfac": 4.9,
+  "twojmax": 8,
+  "r": 0.5,
+  "w": 1
+ },
+ "chimes": {
+  "descriptor": "energy_row_per_atom",
+  "npz": "legacy_si/chimes/chimes_raw.npz"
+ }
+}

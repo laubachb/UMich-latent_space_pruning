@@ -1,0 +1,83 @@
+{
+ "element": "Li",
+ "n_frames": 241,
+ "source": "mlearn data/Li/training.json (Zuo et al. 2020)",
+ "frames": "external/mlearn/Li/training.json",
+ "chimes_dir": "external/chimes/Li",
+ "chimes_fit": "ChIMES 6/6/0 (2b/3b/4b Chebyshev orders), FITENER true, FITSTRS false; A matrix + params from T. Sundberg (Li_6_6_0)",
+ "note": "Hyperparameters of the expert-optimised models of Zuo et al., J. Phys. Chem. A 124, 731 (2020), read from the published model files (mlearn/mvl_models: gap.xml, input.nn, SNAPotential.snapparam) and SI Table S10 (MTP). behler etas are the n2p2 input.nn values converted from Bohr^-2 to \u00c5^-2.",
+ "descriptors": [
+  "soap",
+  "behler",
+  "bispectrum",
+  "mtp",
+  "chimes",
+  "chimes_fingerprint"
+ ],
+ "soap": {
+  "r_cut": 4.8,
+  "n_max": 8,
+  "l_max": 8,
+  "sigma": 0.5
+ },
+ "behler": {
+  "cutoff": 5.2,
+  "r_etas": [
+   0.035711,
+   0.071421,
+   0.178553,
+   0.357106,
+   0.714213,
+   1.785532,
+   3.571065,
+   7.14213,
+   17.855324
+  ],
+  "r_shift": [
+   0.0,
+   1.0,
+   2.0,
+   3.0,
+   4.0
+  ],
+  "a_etas": [
+   0.035711,
+   0.071421,
+   0.178553,
+   0.357106,
+   0.714213,
+   1.785532,
+   3.571065,
+   7.14213,
+   17.855324
+  ],
+  "zetas": [
+   1.0,
+   2.0,
+   4.0,
+   16.0
+  ],
+  "lambdas": [
+   1,
+   -1
+  ]
+ },
+ "bispectrum": {
+  "rcutfac": 5.1,
+  "twojmax": 8,
+  "r": 0.5,
+  "w": 1
+ },
+ "mtp": {
+  "level": 16,
+  "cutoff": 5.1
+ },
+ "chimes": {
+  "descriptor": "energy_row_per_atom"
+ },
+ "chimes_fingerprint": {
+  "alpha": 1.0,
+  "params_file": "params.txt",
+  "bins": 100
+ }
+}

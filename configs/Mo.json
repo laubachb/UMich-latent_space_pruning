@@ -1,0 +1,71 @@
+{
+ "element": "Mo",
+ "n_frames": 194,
+ "source": "mlearn data/Mo/training.json (Zuo et al. 2020)",
+ "frames": "external/mlearn/Mo/training.json",
+ "chimes_dir": "external/chimes/Mo",
+ "chimes_fit": "ChIMES 22/10/4 (2b/3b/4b Chebyshev orders), FITENER true, FITSTRS false; A matrix + params from T. Sundberg (Mo_22_10_4)",
+ "note": "Hyperparameters of the expert-optimised models of Zuo et al., J. Phys. Chem. A 124, 731 (2020), read from the published model files (mlearn/mvl_models: gap.xml, input.nn, SNAPotential.snapparam) and SI Table S10 (MTP). behler etas are the n2p2 input.nn values converted from Bohr^-2 to \u00c5^-2.",
+ "descriptors": [
+  "soap",
+  "behler",
+  "bispectrum",
+  "mtp",
+  "chimes",
+  "chimes_fingerprint"
+ ],
+ "soap": {
+  "r_cut": 5.2,
+  "n_max": 8,
+  "l_max": 8,
+  "sigma": 0.5
+ },
+ "behler": {
+  "cutoff": 5.2,
+  "r_etas": [
+   0.035711,
+   0.071421,
+   0.178553
+  ],
+  "r_shift": [
+   0.0,
+   1.0,
+   2.0,
+   3.0,
+   4.0
+  ],
+  "a_etas": [
+   0.035711,
+   0.071421,
+   0.178553
+  ],
+  "zetas": [
+   1.0,
+   2.0,
+   4.0,
+   16.0
+  ],
+  "lambdas": [
+   1,
+   -1
+  ]
+ },
+ "bispectrum": {
+  "rcutfac": 4.6,
+  "twojmax": 6,
+  "r": 0.5,
+  "w": 1
+ },
+ "mtp": {
+  "level": 20,
+  "cutoff": 5.2
+ },
+ "chimes": {
+  "descriptor": "energy_row_per_atom"
+ },
+ "chimes_fingerprint": {
+  "alpha": 1.0,
+  "params_file": "params.txt",
+  "bins": 100
+ }
+}

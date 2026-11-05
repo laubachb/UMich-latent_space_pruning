@@ -1,24 +1,28 @@
 # Potential Fitting on Pruned Datasets
 
 This directory holds the generation scripts that fit machine-learned interatomic
-potentials (MLIPs) on the **pruned silicon training sets** produced upstream by
-Farthest Point Sampling (FPS) in [`../descriptors/`](../descriptors/). Four
-potential families are trained:
+potentials (MLIPs) on the **pruned training sets** selected upstream in each
+descriptor's latent space (`../results/<dataset>/selection/`, materialised with
+`../scripts/export_cuts.py`). Five potential families map onto the latent spaces:
 
-| Potential | Full name | Native representation | Pruned data source |
+| Potential | Full name | Native representation | Selection (FPS) |
 |---|---|---|---|
-| **ChIMES** | Chebyshev Interaction Model for Efficient Simulation | ChIMES many-body polynomials | `../descriptors/chimes/replicates_structure_pruning_modified/` |
-| **GAP** | Gaussian Approximation Potential | SOAP kernel | `../descriptors/soap/replicates_structure_pruning_modified/` |
-| **NNP** | Neural Network Potential (Behler–Parrinello) | BP symmetry functions | `../descriptors/behler/replicates_structure_pruning_modified/` |
-| **SNAP** | Spectral Neighbor Analysis Potential | Bispectrum coefficients | `../descriptors/bispectrum/replicates_structure_pruning_modified/` |
+| **ChIMES** | Chebyshev Interaction Model for Efficient Simulation | ChIMES many-body polynomials | `fps-chimes` (and `fps-chimes_fingerprint`) |
+| **GAP** | Gaussian Approximation Potential | SOAP kernel | `fps-soap` |
+| **NNP** | Neural Network Potential (Behler–Parrinello) | BP symmetry functions | `fps-behler` |
+| **SNAP** | Spectral Neighbor Analysis Potential | Bispectrum coefficients | `fps-bispectrum` |
+| **MTP** | Moment Tensor Potential | MTP basis functions | `fps-mtp` |
+
+The original Si cuts used for the first round of fits are the FPS selections of
+`configs/si_legacy.json` (identical frame lists; see `tests/test_legacy_si.py`).
 
 ## Motivation
 
 The central question of this repository is **descriptor-induced sampling bias**:
 different atomic descriptors, used as the distance metric for FPS, curate
 *systematically different* training subsets from the *same* pool of DFT frames
-(see the normalized-composition and latent-space analyses in
-[`../pruning/`](../pruning/) and [`../clustering/`](../clustering/)). The obvious
+(see the composition, information and distance analyses in
+[`../lsp/analysis/`](../lsp/analysis/)). The obvious
 follow-up question is: **does that sampling bias actually matter for the fitted
 potential?**
 
@@ -34,9 +38,8 @@ This closes the loop: the descriptor that decides *what* the model sees is the
 same descriptor the model uses to *represent* what it sees. Comparing the four
 potentials' accuracy as a function of pruning ratio (1–90%), especially in the
 **low-data regime**, isolates how each representation's sampling bias propagates
-into downstream MLIP quality. A random-selection baseline
-([`../pruning/random_baseline.py`](../pruning/random_baseline.py)) anchors the
-comparison.
+into downstream MLIP quality. A random-selection baseline (`random` in `../lsp/selection.py`) anchors the
+comparison; `kmedoids-*` and `leverage-*` selections probe other subsampling rules.
 
 ## Layout (planned)
 
@@ -53,17 +56,18 @@ models/
 └── README.md
 ```
 
-Each cut is identified by the same filename convention used upstream:
-`si_structures_<descriptor>_mean_std_<PERCENT>percent_replicate<NN>.json`, so a
-fit for a given ratio/replicate maps 1:1 to the exact frames FPS selected.
+Cuts exported by `scripts/export_cuts.py` are named
+`<dataset>_<sampler>-<descriptor>_<PERCENT>percent_replicate<NN>.json` (plus a
+`*_info.json` with the frame indices and seed), so a fit for a given
+retention/replicate maps 1:1 to the exact frames selected.
 
 ## Reproducibility — seeds are mandatory
 
 **Every script in this repository must fix its random seeds**, and the model
 generation scripts here are no exception. Any nondeterminism must be pinned:
 
-- **Data selection** is already seeded upstream: `compute_and_prune.py` sets
-  `random.seed(42)` and derives one FPS `random_state` per replicate, so the ten
+- **Data selection** is already seeded upstream: `lsp/selection.py` sets
+  `random.seed(42)` and derives one `random_state` per replicate, so the ten
   replicate cuts are byte-for-byte reproducible.
 - **Model fitting** must fix every seed it introduces — weight initialization and
   batch shuffling (NNP), sparse-point / active-set selection (GAP), any
