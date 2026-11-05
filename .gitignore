@@ -52,3 +52,7 @@ build/
 
 # maml/LAMMPS scratch directories (created in the working directory)
 tmp*/
+
+# exported training-subset archives (tens of GB; regenerate with scripts/export_training_subsets.py)
+results/*.tar.gz
+results/*.tar

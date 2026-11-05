@@ -26,6 +26,9 @@ import argparse
 import csv
 import io
 import json
+import os
+import shutil
+import subprocess
 import sys
 import tarfile
 import time
@@ -158,7 +161,16 @@ def main():
     mw.writerow(["file", "element", "sampler", "latent_space", "latent_space_id", "retention_pct", "replicate", "seed",
                  "n_frames", "n_atoms", "frame_indices", "excluded_frames_in_space"])
     n_files = 0
-    with tarfile.open(a.out, "w:gz", compresslevel=6) as tar:
+    # gzip in parallel with pigz when available (the archive is tens of GB of JSON)
+    pigz = shutil.which("pigz")
+    if pigz:
+        fh = open(a.out, "wb")
+        proc = subprocess.Popen([pigz, "-p", str(os.cpu_count() or 8), "-6", "-c"], stdin=subprocess.PIPE, stdout=fh)
+        tar = tarfile.open(fileobj=proc.stdin, mode="w|")
+    else:
+        proc = None
+        tar = tarfile.open(a.out, "w:gz", compresslevel=6)
+    try:
         add_text(tar, f"{root}/README.md", readme(a.datasets, a.percents, a.replicates), mtime)
         for ds in a.datasets:
             el = config.load(ds)["element"]
@@ -180,6 +192,13 @@ def main():
                     n_files += 1
                 print(f"  {el} {s:9s} {space:34s} {n_files:6d} files ({time.time() - t0:.0f} s)", flush=True)
         add_text(tar, f"{root}/manifest.csv", manifest.getvalue(), mtime)
+    finally:
+        tar.close()
+        if proc is not None:
+            proc.stdin.close()
+            if proc.wait() != 0:
+                raise RuntimeError("pigz failed")
+            fh.close()
     print(f"wrote {n_files} subsets -> {a.out} ({a.out.stat().st_size / 1e9:.2f} GB, {time.time() - t0:.0f} s)")
 
 
