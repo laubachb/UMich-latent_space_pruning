@@ -1,0 +1,14 @@
+{
+ "dataset": "Cu",
+ "descriptor": "mtp",
+ "shape": [
+  262,
+  576
+ ],
+ "seconds": 35.4,
+ "params": {
+  "level": 20,
+  "cutoff": 3.9
+ },
+ "n_nan_rows": 0
+}

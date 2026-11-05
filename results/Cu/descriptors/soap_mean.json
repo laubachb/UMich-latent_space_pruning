@@ -1,0 +1,11 @@
+{
+ "dataset": "Cu",
+ "descriptor": "soap_mean",
+ "shape": [
+  262,
+  324
+ ],
+ "seconds": 0.4,
+ "params": {},
+ "n_nan_rows": 0
+}

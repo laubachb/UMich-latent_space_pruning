@@ -1,0 +1,11 @@
+{
+ "dataset": "Cu",
+ "descriptor": "behler_mean",
+ "shape": [
+  262,
+  27
+ ],
+ "seconds": 0.1,
+ "params": {},
+ "n_nan_rows": 0
+}

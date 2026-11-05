@@ -1,0 +1,11 @@
+{
+ "dataset": "Cu",
+ "descriptor": "bispectrum_mean",
+ "shape": [
+  262,
+  55
+ ],
+ "seconds": 0.1,
+ "params": {},
+ "n_nan_rows": 0
+}

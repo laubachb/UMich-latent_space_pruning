@@ -1,0 +1,13 @@
+{
+ "dataset": "Cu",
+ "descriptor": "chimes",
+ "shape": [
+  262,
+  285
+ ],
+ "seconds": 0.6,
+ "params": {
+  "descriptor": "energy_row_per_atom"
+ },
+ "n_nan_rows": 0
+}

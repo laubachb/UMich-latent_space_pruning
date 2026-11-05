@@ -110,57 +110,80 @@ def leverage_cut(Z: np.ndarray, k: int, seed: int, p: np.ndarray | None = None) 
 
 
 # ── drivers ─────────────────────────────────────────────────────────────────
-def run(dataset: str, sampler: str, descriptor: str | None = None, force: bool = False) -> dict:
-    """Compute (or load) the selection of one sampler in one latent space."""
+def _random_cuts(n: int, seeds: list[int], percents: list[int]) -> list[dict]:
+    reps = []
+    for s in seeds:
+        cuts = {}
+        for p in percents:
+            np.random.seed(s)                       # one independent draw per (seed, retention)
+            cuts[str(p)] = np.random.choice(n, n_select(n, p), replace=False).tolist()
+        reps.append(dict(seed=int(s), cuts=cuts))
+    return reps
+
+
+def _kmedoids_rep(args):
+    Z, pool, n, seed, percents = args
+    return dict(seed=int(seed), cuts={str(p): pool[kmedoids_cut(Z, n_select(n, p), seed)].tolist() for p in percents})
+
+
+def _compute(X: np.ndarray, sampler: str, seeds: list[int], percents: list[int]) -> tuple[str, list[dict], list[int]]:
+    """(kind, replicates, excluded_frames) of one sampler on one raw descriptor matrix."""
+    ok = np.isfinite(X).all(axis=1)
+    pool = np.where(ok)[0]
+    Z = descriptors.standardize(X[pool])
+    n = len(X)
+    if sampler == "fps":
+        reps = [dict(seed=int(s), ranking=pool[fps_ranking(Z, s)].tolist()) for s in seeds]
+        kind = "ranking"
+    elif sampler == "kmedoids":
+        from .descriptors.aggregate import parallel_frames
+        reps = parallel_frames(_kmedoids_rep, [(Z, pool, n, s, percents) for s in seeds], "kmedoids replicates")
+        kind = "cuts"
+    elif sampler == "leverage":
+        lev = leverage_scores(Z)
+        reps = [dict(seed=int(s), cuts={str(p): pool[leverage_cut(Z, n_select(n, p), s, lev)].tolist() for p in percents})
+                for s in seeds]
+        kind = "cuts"
+    else:
+        raise KeyError(sampler)
+    return kind, reps, np.where(~ok)[0].tolist()
+
+
+def run(dataset: str, sampler: str, descriptor: str | None = None, force: bool = False,
+        percents: list[int] = PERCENTS, n_replicates: int = N_REPLICATES, subdir: str = "selection") -> dict:
+    """Compute (or load) the selection of one sampler in one latent space.
+
+    The analysis set lives in results/<ds>/selection/ (PERCENTS x N_REPLICATES); other
+    grids (e.g. the exported training subsets, 100 replicates x 7 retentions) go to
+    another `subdir`. Seeds are the first n_replicates of the same seed sequence, so
+    replicate r is the same cut wherever it appears."""
     method = method_id(sampler, descriptor)
-    f = selection_file(dataset, method)
+    f = paths.results_dir(dataset, subdir) / f"{method}.json"
     if f.exists() and not force:
         with open(f) as fh:
-            return json.load(fh)
-    seeds = replicate_seeds()
+            sel = json.load(fh)
+        if sel["percents"] == list(percents) and len(sel["replicates"]) == n_replicates:
+            return sel
+    seeds = replicate_seeds(n_replicates)
     if sampler == "random":
         n = len(data.load_frames(dataset))
-        reps = []
-        for s in seeds:
-            cuts = {}
-            for p in PERCENTS:
-                np.random.seed(s)                       # one independent draw per (seed, retention)
-                cuts[str(p)] = np.random.choice(n, n_select(n, p), replace=False).tolist()
-            reps.append(dict(seed=int(s), cuts=cuts))
         sel = dict(dataset=dataset, method=method, sampler=sampler, descriptor=None, kind="cuts",
-                   n_frames=n, n_features=0, percents=PERCENTS, excluded_frames=[], replicates=reps)
+                   n_frames=n, n_features=0, percents=list(percents), excluded_frames=[],
+                   replicates=_random_cuts(n, seeds, percents))
     else:
         X = descriptors.compute(dataset, descriptor)
-        ok = np.isfinite(X).all(axis=1)
-        pool = np.where(ok)[0]
-        Z = descriptors.standardize(X[pool])
-        n = len(X)
-        reps = []
-        if sampler == "fps":
-            for s in seeds:
-                reps.append(dict(seed=int(s), ranking=pool[fps_ranking(Z, s)].tolist()))
-            kind = "ranking"
-        else:
-            lev = leverage_scores(Z) if sampler == "leverage" else None
-            for s in seeds:
-                cuts = {}
-                for p in PERCENTS:
-                    k = n_select(n, p)
-                    idx = kmedoids_cut(Z, k, s) if sampler == "kmedoids" else leverage_cut(Z, k, s, lev)
-                    cuts[str(p)] = pool[idx].tolist()
-                reps.append(dict(seed=int(s), cuts=cuts))
-            kind = "cuts"
+        kind, reps, excluded = _compute(X, sampler, seeds, percents)
         sel = dict(dataset=dataset, method=method, sampler=sampler, descriptor=descriptor, kind=kind,
-                   n_frames=n, n_features=int(X.shape[1]), percents=PERCENTS,
-                   excluded_frames=np.where(~ok)[0].tolist(), replicates=reps)
+                   n_frames=int(X.shape[0]), n_features=int(X.shape[1]), percents=list(percents),
+                   excluded_frames=excluded, replicates=reps)
     with open(f, "w") as fh:
         json.dump(sel, fh)
-    print(f"[{dataset}] selection '{method}' ({len(seeds)} replicates) -> {f}")
+    print(f"[{dataset}] selection '{method}' ({len(seeds)} replicates, {len(percents)} retentions) -> {f}")
     return sel
 
 
-def load(dataset: str, method: str) -> dict:
-    with open(selection_file(dataset, method)) as fh:
+def load(dataset: str, method: str, subdir: str = "selection") -> dict:
+    with open(paths.results_dir(dataset, subdir) / f"{method}.json") as fh:
         return json.load(fh)
 
 

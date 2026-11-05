@@ -1,0 +1,16 @@
+{
+ "dataset": "Cu",
+ "descriptor": "soap",
+ "shape": [
+  262,
+  648
+ ],
+ "seconds": 8.3,
+ "params": {
+  "r_cut": 4.1,
+  "n_max": 8,
+  "l_max": 8,
+  "sigma": 0.5
+ },
+ "n_nan_rows": 0
+}

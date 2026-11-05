@@ -1,0 +1,16 @@
+{
+ "dataset": "Cu",
+ "descriptor": "bispectrum",
+ "shape": [
+  262,
+  110
+ ],
+ "seconds": 156.8,
+ "params": {
+  "rcutfac": 4.1,
+  "twojmax": 8,
+  "r": 0.5,
+  "w": 1
+ },
+ "n_nan_rows": 0
+}
