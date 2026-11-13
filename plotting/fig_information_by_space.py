@@ -7,8 +7,9 @@ difference from random subsets of the same size. Columns: FPS, k-medoids, levera
 For one element, latent space and retention, the difference is the median over the 25
 replicates of the sampler minus the median over the 25 random replicates (the
 definition that reproduces the published figure exactly). Coloured lines are the median
-of that difference over the six elements for each latent space; the black line is the
-median over all 36 element / latent-space combinations, i.e. the published curve.
+of that difference over the six elements for each latent space, with bands spanning the
+interquartile range over the elements; the black line is the median over all 36 element /
+latent-space combinations, i.e. the published curve (whose IQR band is in fig_information).
 
     python plotting/fig_information_by_space.py   # -> figures/information/fig_information_by_space.{pdf,png}
 """
@@ -57,8 +58,10 @@ def main():
             ax = axes[r, c]
             sub = D[D.sampler == s]
             for sp, label, col in SPACES:
-                g = sub[sub.space == sp].groupby("percent")[m].median()
-                ax.plot(g.index, g.values, color=col, lw=1.8, label=label)
+                g = sub[sub.space == sp].groupby("percent")[m]
+                q25, q75 = g.quantile(0.25), g.quantile(0.75)
+                ax.fill_between(q25.index, q25.values, q75.values, color=col, alpha=0.10, lw=0)
+                ax.plot(g.median().index, g.median().values, color=col, lw=1.8, label=label)
             pooled = sub.groupby("percent")[m].median()
             ax.plot(pooled.index, pooled.values, color="black", lw=2.6, label="All spaces (median)")
             ax.axhline(0, color="black", ls=":", lw=1.0)
